@@ -1,0 +1,15 @@
+[package]
+name = "logline-lab-mcp-server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+logline-act.workspace = true
+logline-lab-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

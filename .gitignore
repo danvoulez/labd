@@ -1,0 +1,10 @@
+# Extraction workspace for the build package (raw material; the zip is tracked)
+/_extracted/
+
+# Rust build outputs
+target/
+**/target/
+
+# OS / editor cruft
+.DS_Store
+__MACOSX/

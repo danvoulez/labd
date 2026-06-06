@@ -1,0 +1,23 @@
+[package]
+name = "logline-lab-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "labkit"
+path = "src/main.rs"
+
+[dependencies]
+logline-act.workspace = true
+logline-lab-core.workspace = true
+logline-lab-labd.workspace = true
+logline-lab-recovery-scanner = { path = "../../recovery/scanner" }
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+
+[lints]
+workspace = true

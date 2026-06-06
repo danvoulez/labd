@@ -1,0 +1,8 @@
+{
+  "lab_id": "example.local.lab",
+  "profile": "local-only",
+  "pack": "demo",
+  "settings": {
+    "description": "Example Lab instance used by install/doctor.sh and the first-session example."
+  }
+}

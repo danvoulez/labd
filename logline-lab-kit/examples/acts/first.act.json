@@ -1,0 +1,15 @@
+{
+  "who": "example.operator",
+  "did": "declare_lab",
+  "this": {
+    "lab_id": "example.local.lab",
+    "profile": "local-only",
+    "pack": "demo"
+  },
+  "when": "2026-06-06T00:00:00Z",
+  "confirmed_by": "none",
+  "if_ok": "record_lab_declaration",
+  "if_doubt": "carry_as_blocked_act_missing_confirmation",
+  "if_not": "reject_lab_declaration",
+  "status": "candidate"
+}

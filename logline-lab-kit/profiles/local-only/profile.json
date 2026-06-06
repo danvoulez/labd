@@ -1,0 +1,7 @@
+{
+  "name": "local-only",
+  "spine": "memory",
+  "settings": {
+    "description": "Offline profile. The spine is an in-process store; the local outbox is the cache. Nothing leaves the machine."
+  }
+}

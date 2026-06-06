@@ -1,0 +1,10 @@
+{
+  "name": "santo-andre",
+  "version": "0.1.0",
+  "did_vocabulary": ["declare_lab", "register_member", "record_attendance", "open_session"],
+  "scopes": ["santo-andre.session", "santo-andre.attendance"],
+  "extra": {
+    "description": "Reference pack of Santo André conventions. A pack, not the product root.",
+    "note": "Loading this pack must not change Lab Kit core (Operator §13)."
+  }
+}

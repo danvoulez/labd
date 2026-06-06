@@ -1,0 +1,6 @@
+{
+  "name": "daily_report",
+  "fires_on": "clock.tick.daily",
+  "action": "generate_lab_report",
+  "note": "Generates a report (never a receipt) from projections."
+}
