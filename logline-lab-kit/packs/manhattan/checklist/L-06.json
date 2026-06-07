@@ -1,0 +1,10 @@
+{
+  "id": "L-06",
+  "title": "Ethernet link health proof",
+  "scope": "manhattan.L-06",
+  "did": "ethernet_ping_check",
+  "gate": "link_up",
+  "proof_chain": ["act", "gate", "worker_ping", "evidence", "scoped_receipt", "projection"],
+  "ghosts": ["G-08 Ethernet interface name per LAB (real fleet peer ping)"],
+  "note": "v0 proves the mechanism with genuine runtime evidence from a real local probe. The real fleet Ethernet ping to peers remains ghosted (G-08)."
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Ruler Report",
+  "type": "object",
+  "required": ["now", "due", "overdue", "capacity"],
+  "properties": {
+    "now": { "type": "string" },
+    "due": { "type": "array" },
+    "overdue": { "type": "array", "items": { "type": "string" } },
+    "capacity": {
+      "type": "object",
+      "properties": {
+        "state": { "type": "string", "enum": ["under", "healthy"] },
+        "executable_work": { "type": "integer" },
+        "pending_due": { "type": "integer" },
+        "next_study_proposal": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

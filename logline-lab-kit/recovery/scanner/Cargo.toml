@@ -1,0 +1,21 @@
+[package]
+name = "logline-lab-recovery-scanner"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "recovery-scan"
+path = "src/main.rs"
+
+[lib]
+name = "logline_lab_recovery_scanner"
+path = "src/lib.rs"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

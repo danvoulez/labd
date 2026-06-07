@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Ghost",
+  "type": "object",
+  "required": ["id", "scope", "missing_proof", "closure_condition"],
+  "properties": {
+    "id": { "type": "string" },
+    "scope": { "type": "string" },
+    "missing_proof": { "type": "string" },
+    "owner": { "type": "string" },
+    "blocks": { "type": "string" },
+    "next_action": { "type": "string" },
+    "closure_condition": { "type": "string" },
+    "closed": { "type": "boolean" }
+  },
+  "description": "A ghost is named missing proof. It may never be silently closed."
+}

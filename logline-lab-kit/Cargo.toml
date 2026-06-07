@@ -1,0 +1,54 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/logline-act",
+  "crates/logline-lab-core",
+  "crates/logline-lab-local",
+  "crates/logline-lab-spine",
+  "crates/logline-lab-supabase",
+  "crates/logline-lab-projectors",
+  "crates/logline-lab-clock",
+  "crates/logline-lab-ruler",
+  "crates/logline-lab-hooks",
+  "crates/logline-lab-dispatch",
+  "crates/logline-lab-reports",
+  "crates/logline-lab-conformance",
+  "crates/logline-lab-cli",
+  "crates/logline-lab-labd",
+  "crates/logline-lab-acceptance",
+  "apps/mcp-server",
+  "recovery/scanner",
+]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.75"
+license = "MIT OR Apache-2.0"
+version = "0.1.0"
+authors = ["LogLine Lab Kit"]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+clap = { version = "4.5", features = ["derive"] }
+thiserror = "2.0"
+anyhow = "1.0"
+
+# internal
+logline-act = { path = "crates/logline-act" }
+logline-lab-core = { path = "crates/logline-lab-core" }
+logline-lab-local = { path = "crates/logline-lab-local" }
+logline-lab-spine = { path = "crates/logline-lab-spine" }
+logline-lab-supabase = { path = "crates/logline-lab-supabase" }
+logline-lab-projectors = { path = "crates/logline-lab-projectors" }
+logline-lab-clock = { path = "crates/logline-lab-clock" }
+logline-lab-ruler = { path = "crates/logline-lab-ruler" }
+logline-lab-hooks = { path = "crates/logline-lab-hooks" }
+logline-lab-dispatch = { path = "crates/logline-lab-dispatch" }
+logline-lab-reports = { path = "crates/logline-lab-reports" }
+logline-lab-conformance = { path = "crates/logline-lab-conformance" }
+logline-lab-labd = { path = "crates/logline-lab-labd" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

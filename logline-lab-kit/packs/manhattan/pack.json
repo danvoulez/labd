@@ -1,0 +1,20 @@
+{
+  "name": "manhattan",
+  "version": "0.2.0",
+  "did_vocabulary": [
+    "gate_decision",
+    "machine_heartbeat",
+    "ethernet_ping_check",
+    "register_runtime",
+    "report_runtime_status"
+  ],
+  "scopes": ["manhattan.L-06", "manhattan.fleet"],
+  "extra": {
+    "description": "Physical fleet conventions for Project Manhattan. A pack, not the product root.",
+    "ghosts": [
+      "G-01 Cloudflare tunnel health endpoint / parse pattern",
+      "G-02 peer MAC addresses for WOL",
+      "G-08 Ethernet interface name per LAB"
+    ]
+  }
+}

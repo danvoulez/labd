@@ -1,0 +1,13 @@
+# Schedule conventions (FINAL §10). Time is infrastructure for study, not the
+# product identity. A scheduled Act carries `this.due_at` (RFC3339).
+version: 0
+fields:
+  due_at: "RFC3339 timestamp the Act becomes due"
+status_flow:
+  - scheduled
+  - due
+  - running
+  - blocked
+  - rescheduled
+  - resolved
+rule: "No due Act is skipped silently; every due Act gets an explicit disposition."

@@ -1,0 +1,9 @@
+{
+  "name": "supabase",
+  "spine": "supabase",
+  "settings": {
+    "url": "https://YOUR-PROJECT.supabase.co",
+    "service_key_env": "SUPABASE_SERVICE_KEY",
+    "note": "Secrets are referenced by env var name only, never embedded (Operator §13). Live ingest is ghosted: see recovery/REPO_ASSEMBLY_PLAN.md ghost `supabase-live-ingest`."
+  }
+}

@@ -1,0 +1,24 @@
+[package]
+name = "logline-lab-labd"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+logline-act.workspace = true
+logline-lab-core.workspace = true
+logline-lab-local.workspace = true
+logline-lab-spine.workspace = true
+logline-lab-supabase.workspace = true
+logline-lab-projectors.workspace = true
+logline-lab-reports.workspace = true
+logline-lab-clock.workspace = true
+logline-lab-ruler.workspace = true
+logline-lab-conformance.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true

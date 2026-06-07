@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Receipt Candidate",
+  "type": "object",
+  "required": ["kind", "scope", "act_content_hash", "evidence_count"],
+  "properties": {
+    "kind": { "const": "logline.receipt_candidate.v0" },
+    "scope": { "type": "string", "description": "The exact scope this candidate would close, and nothing else." },
+    "act_content_hash": { "type": "string" },
+    "evidence_kinds": { "type": "array", "items": { "type": "string" } },
+    "evidence_count": { "type": "integer", "minimum": 1 }
+  },
+  "description": "A receipt candidate requires evidence. Receipts close only what was proven."
+}

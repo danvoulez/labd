@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Learning Report",
+  "type": "object",
+  "required": ["kind", "next_action"],
+  "properties": {
+    "kind": { "const": "logline.learning_report.v0" },
+    "lab_id": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "closed": { "type": "integer" },
+    "failed": { "type": "integer" },
+    "ghosted": { "type": "integer" },
+    "repeated": { "type": "array" },
+    "open_ghosts": { "type": "array", "items": { "type": "string" } },
+    "next_action": { "type": "string", "description": "Learning always proposes a next Act." }
+  }
+}

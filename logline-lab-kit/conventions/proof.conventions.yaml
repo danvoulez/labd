@@ -1,0 +1,12 @@
+# Proof conventions (FINAL §11.7). Claim, evidence, receipt, and ghost are
+# always separate. A report or model text is NEVER proof.
+version: 0
+separation:
+  claim: "an Act stating something"
+  evidence: "real captured data attached to a scope"
+  receipt_candidate: "names the exact scope it would close; requires evidence"
+  ghost: "named missing proof; never silently closed"
+forbidden:
+  - "report counts as receipt"
+  - "model output counts as evidence"
+  - "receipt without evidence"

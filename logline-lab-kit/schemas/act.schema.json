@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Act",
+  "type": "object",
+  "required": ["who", "did", "this", "when", "confirmed_by", "if_ok", "if_doubt", "if_not", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "who": {},
+    "did": {},
+    "this": {},
+    "when": {},
+    "confirmed_by": {},
+    "if_ok": {},
+    "if_doubt": {},
+    "if_not": {},
+    "status": {}
+  }
+}

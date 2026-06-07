@@ -1,0 +1,5 @@
+{
+  "name": "personal-offline",
+  "spine": "memory",
+  "settings": { "description": "A personal offline Lab. No network, ever. The local outbox is the cache; nothing syncs out." }
+}

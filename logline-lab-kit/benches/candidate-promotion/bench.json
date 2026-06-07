@@ -1,0 +1,13 @@
+{
+  "id": "candidate-promotion",
+  "question": "Does an ugly candidate promote only after it has all nine valid slots?",
+  "hypothesis": "Capture is generous; promotion is strict.",
+  "inputs": {"sample": "ugly candidate"},
+  "procedure": "Capture an incomplete candidate, then repair and attempt promotion.",
+  "expected": "Promotion fails until all nine slots are present and non-empty.",
+  "success_criteria": "Repaired candidate promotes; unrepaired candidate is rejected.",
+  "failure_criteria": "An incomplete candidate promotes.",
+  "receipt_scope": "bench.candidate-promotion",
+  "ghost_policy": "If promotion behavior is ambiguous, open a ghost for missing conformance vectors.",
+  "allowed_tools": []
+}

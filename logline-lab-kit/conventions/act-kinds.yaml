@@ -1,0 +1,15 @@
+# Act kinds — conventional `did` vocabularies. These are CONVENTIONS over Act
+# payloads, never new semantic primitives (FINAL §6.1). Everything remains an Act
+# with exactly nine slots.
+version: 0
+core_kinds:
+  - declare_lab
+  - observe
+  - proposed
+  - designed_probe
+  - scheduled_check
+  - reschedule_act
+  - report_execution_result
+note: >
+  Packs extend this vocabulary in their pack.json `did_vocabulary`. The kit core
+  never hardcodes pack vocabulary.

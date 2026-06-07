@@ -1,0 +1,7 @@
+{
+  "lab_id": "example.local.lab",
+  "profile": "local-only",
+  "settings": {
+    "description": "Example Lab instance. The basics: identity + profile, no pack. Packs are optional complements."
+  }
+}
