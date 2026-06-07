@@ -1,0 +1,57 @@
+# 2026-06-07T10:55:50Z — OPTIONAL supabase-profile (staging only; NOT publication-grade)
+## build adapter crate + labd with feature
+   Compiling logline-lab-supabase v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-supabase)
+   Compiling logline-lab-labd v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-labd)
+   Compiling logline-lab-mcp-server v0.4.0-rc1 (/home/user/labd/logline-lab-kit/apps/mcp-server)
+   Compiling logline-lab-acceptance v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-acceptance)
+   Compiling logline-lab-cli v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.82s
+## test adapter + labd feature
+   Compiling syn v2.0.117
+   Compiling serde_derive v1.0.228
+   Compiling thiserror-impl v2.0.18
+   Compiling thiserror v2.0.18
+   Compiling serde v1.0.228
+   Compiling logline-act v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-act)
+   Compiling logline-lab-local v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-local)
+   Compiling logline-lab-spine v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-spine)
+   Compiling logline-lab-supabase v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-supabase)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.47s
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_supabase-2e334847bf3a596e)
+
+running 2 tests
+test tests::builds_content_addressed_payload ... ok
+test tests::staging_spine_is_idempotent_and_queues_payloads ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_supabase
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling logline-lab-core v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-core)
+   Compiling logline-lab-clock v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-clock)
+   Compiling logline-lab-conformance v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-conformance)
+   Compiling logline-lab-projectors v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-projectors)
+   Compiling logline-lab-ruler v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-ruler)
+   Compiling logline-lab-reports v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-reports)
+   Compiling logline-lab-labd v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-labd)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.08s
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_labd-4000789d4e814dd3)
+
+running 2 tests
+test tests::supabase_profile_selects_supabase_spine ... ok
+test tests::basics_lab_runs_without_a_pack ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_labd
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+## NOTE: staged only. publication_grade remains false until a real external
+##       spine doctor proves admit+write+readback+hash+reproducible export.

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Start View",
+  "description": "Output of the Start surface (Lab::start / `labkit start`).",
+  "type": "object",
+  "required": ["kind", "lab_id", "profile", "packs", "spine_kind", "grade", "publication_grade", "storage_matrix", "conformance_green", "total_acts", "next_actions"],
+  "properties": {
+    "kind": { "const": "logline.view.start.v0" },
+    "lab_id": { "type": "string" },
+    "profile": { "type": "string" },
+    "packs": { "type": "array", "items": { "type": "string" } },
+    "spine_kind": { "type": "string" },
+    "grade": { "type": "string", "enum": ["candidate-only", "dev-ephemeral", "staged", "publication"] },
+    "publication_grade": { "type": "boolean" },
+    "storage_warning": { "type": ["string", "null"] },
+    "storage_matrix": { "$ref": "./storage-matrix.schema.json" },
+    "conformance_green": { "type": "boolean" },
+    "total_acts": { "type": "integer", "minimum": 0 },
+    "next_actions": { "type": "array", "items": { "type": "string" } }
+  }
+}

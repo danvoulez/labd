@@ -182,7 +182,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use logline_lab_local::LocalOutbox;
+    use logline_lab_local::LocalActLog;
     use logline_lab_spine::{sync, MemorySpine};
     use serde_json::json;
 
@@ -201,12 +201,12 @@ mod tests {
     }
 
     fn spine_with(acts: Vec<Act>) -> MemorySpine {
-        let mut outbox = LocalOutbox::in_memory();
+        let mut act_log = LocalActLog::in_memory();
         for a in &acts {
-            outbox.emit(a).unwrap();
+            act_log.emit(a).unwrap();
         }
         let mut spine = MemorySpine::new();
-        sync(&mut outbox, &mut spine).unwrap();
+        sync(&mut act_log, &mut spine).unwrap();
         spine
     }
 

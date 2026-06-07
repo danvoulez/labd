@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.4.0 — generic v0 cut: storage ontology + time (Etapas 0–6)
+## v0.4.0-rc1 — generic v0 cut + hardening (Etapa 6.5): storage ontology + time (Etapas 0–6)
 
 Disciplined cut to a clean generic v0. Scope frozen in `recovery/RELEASE_SCOPE.md`.
 
@@ -14,9 +14,15 @@ Disciplined cut to a clean generic v0. Scope frozen in `recovery/RELEASE_SCOPE.m
   LATER deployment, not generic.
 - **`labkit tick`** materializes time as Acts (clock_tick + due_disposition +
   reschedule); no due Act skipped. **`labkit storage`** shows the onboarding matrix.
-- **No-pack end-to-end fixture** `release/examples/local-only-first-lab.sh` and
-  clean-build evidence in `release/checks/` (build/test/clippy -D/doctor/fixture
-  all exit 0; 99 tests).
+- **No-pack end-to-end fixture** `release/examples/local-only-first-lab.sh` (now
+  asserts JSON fields) and a real **release gate** `release/checks/run-checks.sh`
+  (`set -euo pipefail`; fails if any step fails). Optional adapter evidence is
+  separate (`release/checks/optional-supabase-profile.sh`).
+- **Hardening (Etapa 6.5):** honest storage naming (`LocalActLog`, not "outbox is
+  truth"); external spines are at most `staged` — no false `publication_grade`
+  without a proven external-spine doctor check; schemas updated to match real
+  contracts (profile/ruler-tick) + added start-view/tick-report/storage-matrix;
+  version unified to `0.4.0-rc1`. **105 tests** pass; clippy `-D warnings` clean.
 - Honest stubs to align the controlling-doc tree (experience/, benches/, install/,
   release/, build-pack/package.manifest.yaml).
 - **Deferred to next cycle (review gate):** science rigor (Etapas 7–8:

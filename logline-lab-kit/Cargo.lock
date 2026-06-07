@@ -184,7 +184,7 @@ checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "logline-act"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "serde",
  "serde_json",
@@ -194,7 +194,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-acceptance"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-clock",
@@ -213,7 +213,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-cli"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "anyhow",
  "clap",
@@ -228,7 +228,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-clock"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "serde",
@@ -237,7 +237,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-conformance"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "serde",
@@ -246,7 +246,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-core"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "serde",
@@ -256,7 +256,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-dispatch"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-core",
@@ -267,7 +267,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-hooks"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "serde",
  "serde_json",
@@ -275,7 +275,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-labd"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-clock",
@@ -294,7 +294,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-local"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "serde",
@@ -304,7 +304,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-mcp-server"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-core",
@@ -315,7 +315,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-projectors"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-core",
@@ -327,7 +327,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-recovery-scanner"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "serde",
  "serde_json",
@@ -335,7 +335,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-reports"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-core",
@@ -348,7 +348,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-ruler"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-clock",
@@ -361,7 +361,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-spine"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-local",
@@ -372,7 +372,7 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-supabase"
-version = "0.1.0"
+version = "0.4.0-rc1"
 dependencies = [
  "logline-act",
  "logline-lab-spine",

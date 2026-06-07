@@ -1,3 +1,5 @@
+> **Historical.** Superseded for generic v0 by `recovery/RELEASE_SCOPE.md` and `recovery/ACCEPTANCE_STATUS.md`. Kept for the record; figures like "43 tests", "A1–A30", "demo pack", and any "outbox is the record" / Supabase-as-default language reflect an earlier state.
+
 # MAP — the living build map
 
 A working tracker, not prose. Edit it: flip the marker on the left as things move. Narrative version is `00_vision.md`; this is the checklist that guides us.

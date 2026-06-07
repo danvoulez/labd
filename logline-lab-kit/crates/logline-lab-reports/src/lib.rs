@@ -58,7 +58,7 @@ pub fn generate(spine: &dyn Spine, lab_id: &str, now: &str) -> LabReport {
 mod tests {
     use super::*;
     use logline_act::Act;
-    use logline_lab_local::LocalOutbox;
+    use logline_lab_local::LocalActLog;
     use logline_lab_spine::{sync, MemorySpine};
     use serde_json::json;
 
@@ -79,11 +79,11 @@ mod tests {
     /// A22 — Lab report renders state from projections.
     #[test]
     fn a22_report_renders_from_projections() {
-        let mut outbox = LocalOutbox::in_memory();
-        outbox.emit(&act("declare_lab")).unwrap();
-        outbox.emit(&act("observe")).unwrap();
+        let mut act_log = LocalActLog::in_memory();
+        act_log.emit(&act("declare_lab")).unwrap();
+        act_log.emit(&act("observe")).unwrap();
         let mut spine = MemorySpine::new();
-        sync(&mut outbox, &mut spine).unwrap();
+        sync(&mut act_log, &mut spine).unwrap();
 
         let report = generate(&spine, "test.local.lab", "2026-06-06T12:00:00Z");
         assert_eq!(report.total_acts, 2);

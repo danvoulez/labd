@@ -1,6 +1,6 @@
 # LogLine Lab Kit — package manifest (control surface index)
 name: logline-lab-kit
-version: 0.3.0
+version: 0.4.0-rc1
 controlling_doc: build-pack/final-real-project-doc.md
 release_scope: recovery/RELEASE_SCOPE.md
 generic_v0:

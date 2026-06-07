@@ -342,8 +342,24 @@ impl Lab {
     }
 
     /// Surface 4 — Write (ugly capture allowed, promotion strict).
+    ///
+    /// Under a `candidate-only` Lab nothing is admitted: even a structurally valid
+    /// Act is *captured* as a candidate, because admission needs a Spine Profile.
     pub fn write(&mut self, value: &Value) -> Result<WriteOutcome, LabError> {
-        match Act::from_value_strict(value) {
+        let strict = Act::from_value_strict(value);
+        if self.admission_grade() == Grade::CandidateOnly {
+            let missing = match &strict {
+                Ok(_) => Vec::new(),
+                Err(_) => Act::candidate_from_value(value)
+                    .missing_slots()
+                    .iter()
+                    .map(|s| s.to_string())
+                    .collect(),
+            };
+            self.push_candidate(value.clone())?;
+            return Ok(WriteOutcome::Candidate { missing });
+        }
+        match strict {
             Ok(act) => {
                 let outcome = self.emit(&act)?;
                 Ok(WriteOutcome::Admitted {

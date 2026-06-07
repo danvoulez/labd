@@ -55,11 +55,19 @@ pub enum Grade {
     CandidateOnly,
     /// Local append-only Act-log spine; dev-only / unregistered / non-publication.
     DevEphemeral,
-    /// A declared external Spine Profile; publication-grade admitted Acts.
+    /// An external Spine Profile is *selected* but not yet proven (admit + write +
+    /// read-back + hash-preserved + reproducible). Selecting a profile is not
+    /// proof, so this is NOT publication-grade.
+    Staged,
+    /// Publication-grade: only reached when an external spine has been *proven* by
+    /// a doctor check. Never inferred from profile selection alone. Reserved for a
+    /// future external-spine doctor (SOON); unreachable via config in v0.
     Publication,
 }
 
 impl Grade {
+    /// True only for proven publication-grade storage. `Staged` is deliberately
+    /// false: a compiled/staging adapter is not publication-grade (RELEASE_SCOPE).
     pub fn is_publication(&self) -> bool {
         matches!(self, Grade::Publication)
     }
@@ -68,6 +76,7 @@ impl Grade {
         match self {
             Grade::CandidateOnly => "candidate-only (no admitted Acts)",
             Grade::DevEphemeral => "dev-only / unregistered / non-publication-grade",
+            Grade::Staged => "staged (external spine selected but unproven) / non-publication-grade",
             Grade::Publication => "publication-grade",
         }
     }
@@ -80,6 +89,11 @@ impl Grade {
             Grade::DevEphemeral => Some(
                 "dev-ephemeral: admitted Acts live in a local Act-log and are \
                  NOT publication-grade. Configure an external Spine Profile to publish.",
+            ),
+            Grade::Staged => Some(
+                "staged: an external Spine Profile is selected but unproven. NOT \
+                 publication-grade until a spine doctor proves admit + write + \
+                 read-back + hash-preserved + reproducible export.",
             ),
             Grade::Publication => None,
         }
@@ -110,12 +124,14 @@ impl ProfileManifest {
         Ok(m)
     }
 
-    /// The protocol grade implied by this profile's spine kind.
+    /// The protocol grade implied by this profile's spine kind. External spines
+    /// are at most `Staged` from configuration alone — publication-grade requires
+    /// a proven external-spine doctor check, never mere selection (RELEASE_SCOPE).
     pub fn grade(&self) -> Grade {
         match self.spine.as_str() {
             "candidate-only" => Grade::CandidateOnly,
             "dev-ephemeral" | "memory" | "local" | "local-only" => Grade::DevEphemeral,
-            "postgres" | "neon" | "supabase" | "byo" | "bring-your-own" => Grade::Publication,
+            "postgres" | "neon" | "supabase" | "byo" | "bring-your-own" => Grade::Staged,
             // Unknown spine kinds are treated conservatively as dev-ephemeral.
             _ => Grade::DevEphemeral,
         }

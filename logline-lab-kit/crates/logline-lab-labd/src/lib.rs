@@ -1,7 +1,7 @@
 //! `logline-lab-labd` — the resident Lab host.
 //!
 //! `labd` keeps a Lab alive: identity (manifest), an optional set of packs, a
-//! profile, a local outbox, a spine, evidence, and ghosts. It exposes the
+//! profile, a local Act-log, a spine, evidence, and ghosts. It exposes the
 //! generic Lab API and the nine **experience surfaces** (FINAL §11) as library
 //! functions — Start, Today, Timeline, Write, Schedule, Workbench, Proof, Learn,
 //! Settings — so any surface (CLI/MCP/web/TUI) can wrap the same grammar.
@@ -28,7 +28,7 @@ use logline_lab_core::{
     receipt::{ReceiptCandidate, ReceiptError},
     Grade, LabManifest, PackManifest, ProfileManifest,
 };
-use logline_lab_local::{EmitOutcome, LocalError, LocalOutbox};
+use logline_lab_local::{EmitOutcome, LocalError, LocalActLog};
 use logline_lab_reports::{generate, generate_learning, LabReport, LearningReport};
 use logline_lab_spine::{sync, MemorySpine, Spine, SpineError, StoredAct, SyncReport};
 #[cfg(feature = "supabase-profile")]
@@ -65,8 +65,8 @@ pub struct DoctorReport {
     pub publication_grade: bool,
     /// Honest warning when the Lab is not publication-grade.
     pub storage_warning: Option<String>,
-    pub outbox_entries: usize,
-    pub unsynced: usize,
+    pub act_log_entries: usize,
+    pub unreplayed: usize,
     pub spine_acts: usize,
     pub conformance_green: bool,
     pub ok: bool,
@@ -99,13 +99,13 @@ pub struct Lab {
     manifest: LabManifest,
     packs: Vec<PackManifest>,
     profile: ProfileManifest,
-    outbox: LocalOutbox,
+    act_log: LocalActLog,
     spine: Box<dyn Spine>,
     evidence: EvidenceLog,
     ghosts: GhostLog,
     /// Ugly candidates preserved by Write before they could become valid Acts.
     candidates: Vec<Value>,
-    /// When set, the Lab is a directory on disk: outbox.jsonl, evidence.jsonl,
+    /// When set, the Lab is a directory on disk: actlog.jsonl, evidence.jsonl,
     /// ghosts.jsonl, candidates.jsonl. This is what lets a human (via CLI) and an
     /// LLM (via MCP) open the SAME Lab and see the same reality across runs.
     store_dir: Option<PathBuf>,
@@ -125,7 +125,7 @@ impl Lab {
             manifest,
             packs,
             profile,
-            outbox: LocalOutbox::in_memory(),
+            act_log: LocalActLog::in_memory(),
             spine,
             evidence: EvidenceLog::new(),
             ghosts: GhostLog::new(),
@@ -134,19 +134,19 @@ impl Lab {
         })
     }
 
-    /// Same as `init` but with a file-backed outbox for durability.
-    pub fn init_with_outbox(
+    /// Same as `init` but with a file-backed Act-log for durability.
+    pub fn init_with_act_log(
         manifest: LabManifest,
         packs: Vec<PackManifest>,
         profile: ProfileManifest,
-        outbox_path: impl AsRef<std::path::Path>,
+        act_log_path: impl AsRef<std::path::Path>,
     ) -> Result<Self, LabError> {
         let spine = Self::spine_for(&profile)?;
         Ok(Self {
             manifest,
             packs,
             profile,
-            outbox: LocalOutbox::open(outbox_path)?,
+            act_log: LocalActLog::open(act_log_path)?,
             spine,
             evidence: EvidenceLog::new(),
             ghosts: GhostLog::new(),
@@ -155,7 +155,7 @@ impl Lab {
         })
     }
 
-    /// Open a Lab as a directory on disk. The directory holds `outbox.jsonl`,
+    /// Open a Lab as a directory on disk. The directory holds `actlog.jsonl`,
     /// `evidence.jsonl`, `ghosts.jsonl`, and `candidates.jsonl`. Existing state is
     /// loaded and the spine is rehydrated, so the same Lab resumes across runs and
     /// is identical for every surface (CLI, MCP, GUI).
@@ -168,7 +168,7 @@ impl Lab {
         let dir = dir.as_ref().to_path_buf();
         std::fs::create_dir_all(&dir).map_err(|e| LocalError::Io(e.to_string()))?;
         let spine = Self::spine_for(&profile)?;
-        let outbox = LocalOutbox::open(dir.join("outbox.jsonl"))?;
+        let act_log = LocalActLog::open(dir.join("actlog.jsonl"))?;
 
         let mut evidence = EvidenceLog::new();
         for ev in read_jsonl::<Evidence>(&dir.join("evidence.jsonl"))? {
@@ -184,7 +184,7 @@ impl Lab {
             manifest,
             packs,
             profile,
-            outbox,
+            act_log,
             spine,
             evidence,
             ghosts,
@@ -274,17 +274,17 @@ impl Lab {
         if self.admission_grade() == Grade::CandidateOnly {
             return Err(LabError::CandidateOnly);
         }
-        Ok(self.outbox.emit(act)?)
+        Ok(self.act_log.emit(act)?)
     }
     pub fn sync(&mut self) -> Result<SyncReport, LabError> {
-        Ok(sync(&mut self.outbox, self.spine.as_mut())?)
+        Ok(sync(&mut self.act_log, self.spine.as_mut())?)
     }
 
-    /// Rebuild the spine from the durable outbox (idempotent). The file-backed
-    /// outbox is the resumable source of state across runs; the spine is a
-    /// derived store, never the truth.
+    /// Rebuild the query spine from the durable local Act-log (idempotent). The
+    /// file-backed Act-log is the resumable source of state across runs; the spine
+    /// is a derived query store, never the truth.
     pub fn rehydrate(&mut self) -> Result<usize, LabError> {
-        let acts: Vec<Act> = self.outbox.list().iter().map(|e| e.act.clone()).collect();
+        let acts: Vec<Act> = self.act_log.list().iter().map(|e| e.act.clone()).collect();
         for a in &acts {
             self.spine.ingest(a)?;
         }
@@ -353,8 +353,8 @@ impl Lab {
             grade,
             publication_grade: grade.is_publication(),
             storage_warning: grade.warning().map(|s| s.to_string()),
-            outbox_entries: self.outbox.len(),
-            unsynced: self.outbox.unsynced().len(),
+            act_log_entries: self.act_log.len(),
+            unreplayed: self.act_log.unreplayed().len(),
             spine_acts: self.spine.all().len(),
             conformance_green,
             ok: conformance_green,

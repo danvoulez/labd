@@ -1,3 +1,5 @@
+> **Historical.** Superseded for generic v0 by `recovery/RELEASE_SCOPE.md` and `recovery/ACCEPTANCE_STATUS.md`. Kept for the record; figures like "43 tests", "A1–A30", "demo pack", and any "outbox is the record" / Supabase-as-default language reflect an earlier state.
+
 # Recovery Receipt — LogLine Lab Kit v0 assembly
 
 This is a **scoped** recovery record. It closes only what evidence proves

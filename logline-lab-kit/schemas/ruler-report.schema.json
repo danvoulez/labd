@@ -1,20 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "LogLine Ruler Report",
+  "title": "LogLine Ruler/Tick Report",
+  "description": "Emitted by `labkit tick` (and Lab::tick). kind == logline.ruler_report.v0. Materializes time as Acts; see schemas/tick-report.schema.json (same contract).",
   "type": "object",
-  "required": ["now", "due", "overdue", "capacity"],
+  "required": ["kind", "now", "due", "overdue", "rescheduled", "capacity", "acts_emitted", "materialized"],
   "properties": {
+    "kind": { "const": "logline.ruler_report.v0" },
     "now": { "type": "string" },
-    "due": { "type": "array" },
-    "overdue": { "type": "array", "items": { "type": "string" } },
-    "capacity": {
-      "type": "object",
-      "properties": {
-        "state": { "type": "string", "enum": ["under", "healthy"] },
-        "executable_work": { "type": "integer" },
-        "pending_due": { "type": "integer" },
-        "next_study_proposal": { "type": ["string", "null"] }
+    "tick_act": { "type": ["string", "null"], "description": "content hash of the emitted clock_tick Act (null when not materialized)" },
+    "due": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["content_hash", "disposition"],
+        "properties": {
+          "content_hash": { "type": "string" },
+          "disposition": { "type": "string", "enum": ["executable", "blocked"] },
+          "reason": { "type": ["string", "null"] }
+        }
       }
-    }
+    },
+    "overdue": { "type": "array", "items": { "type": "string" } },
+    "rescheduled": { "type": "array", "items": { "type": "string" } },
+    "capacity": { "type": "string", "enum": ["under", "healthy"] },
+    "next_study": { "type": ["string", "null"] },
+    "acts_emitted": { "type": "integer", "minimum": 0 },
+    "materialized": { "type": "boolean", "description": "false under candidate-only (evaluated but not emitted)" }
   }
 }

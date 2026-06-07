@@ -1,3 +1,5 @@
+> **Historical.** Superseded for generic v0 by `recovery/RELEASE_SCOPE.md` and `recovery/ACCEPTANCE_STATUS.md`. Kept for the record; figures like "43 tests", "A1–A30", "demo pack", and any "outbox is the record" / Supabase-as-default language reflect an earlier state.
+
 # Migration — Act machine v0 → Lab formation kit (FINAL doc)
 
 The controlling definition changed to `build-pack/final-real-project-doc.md`. This

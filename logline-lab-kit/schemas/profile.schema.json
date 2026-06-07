@@ -5,7 +5,26 @@
   "required": ["name", "spine"],
   "properties": {
     "name": { "type": "string", "minLength": 1 },
-    "spine": { "type": "string", "enum": ["memory", "local", "local-only", "postgres", "supabase"] },
-    "settings": { "type": "object", "description": "Infrastructure config; secrets are referenced by env var name, never embedded." }
-  }
+    "spine": {
+      "type": "string",
+      "description": "Spine kind. candidate-only/dev-ephemeral (and the memory/local/local-only aliases) are available; postgres/neon/supabase/byo/bring-your-own are SOON and at most STAGED until a spine doctor proves them.",
+      "enum": [
+        "candidate-only",
+        "dev-ephemeral",
+        "local-only",
+        "memory",
+        "local",
+        "postgres",
+        "neon",
+        "supabase",
+        "byo",
+        "bring-your-own"
+      ]
+    },
+    "settings": {
+      "type": "object",
+      "description": "Infrastructure config; secrets are referenced by env var name, never embedded."
+    }
+  },
+  "$comment": "Grade derives from spine: candidate-only -> candidate-only; dev-ephemeral/memory/local/local-only -> dev-ephemeral; postgres/neon/supabase/byo/bring-your-own -> staged (NOT publication until proven). publication grade is never inferred from configuration."
 }

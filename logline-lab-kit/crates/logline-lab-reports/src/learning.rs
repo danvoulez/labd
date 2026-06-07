@@ -97,7 +97,7 @@ mod tests {
     use super::*;
     use logline_act::Act;
     use logline_lab_core::{Ghost, GhostLog};
-    use logline_lab_local::LocalOutbox;
+    use logline_lab_local::LocalActLog;
     use logline_lab_spine::{sync, MemorySpine};
     use serde_json::json;
 
@@ -118,11 +118,11 @@ mod tests {
     /// A21 — Learning report proposes next Act.
     #[test]
     fn a21_learning_proposes_next_act() {
-        let mut outbox = LocalOutbox::in_memory();
-        outbox.emit(&act("observe", "closed")).unwrap();
-        outbox.emit(&act("observe", "failed")).unwrap();
+        let mut act_log = LocalActLog::in_memory();
+        act_log.emit(&act("observe", "closed")).unwrap();
+        act_log.emit(&act("observe", "failed")).unwrap();
         let mut spine = MemorySpine::new();
-        sync(&mut outbox, &mut spine).unwrap();
+        sync(&mut act_log, &mut spine).unwrap();
 
         let mut ghosts = GhostLog::new();
         ghosts.record(Ghost::new("ghost:probe", "scope.x", "missing evidence", "capture probe output"));

@@ -98,7 +98,7 @@ pub fn blocked(
 mod tests {
     use super::*;
     use logline_act::Act;
-    use logline_lab_local::LocalOutbox;
+    use logline_lab_local::LocalActLog;
     use logline_lab_spine::{sync, MemorySpine};
     use serde_json::json;
 
@@ -119,11 +119,11 @@ mod tests {
     /// A9 — Projection reads Act from spine.
     #[test]
     fn a9_projection_reads_from_spine() {
-        let mut outbox = LocalOutbox::in_memory();
-        outbox.emit(&act("declare_lab")).unwrap();
-        outbox.emit(&act("observe")).unwrap();
+        let mut act_log = LocalActLog::in_memory();
+        act_log.emit(&act("declare_lab")).unwrap();
+        act_log.emit(&act("observe")).unwrap();
         let mut spine = MemorySpine::new();
-        sync(&mut outbox, &mut spine).unwrap();
+        sync(&mut act_log, &mut spine).unwrap();
 
         let view = recent(&spine, 10);
         assert_eq!(view.len(), 2);
