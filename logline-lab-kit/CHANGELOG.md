@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.0 — headless surfaces (the final 30%)
+
+Close the Lab Kit as a protocol-grade experimental substrate, not a UI project.
+
+- **Headless-first surfaces.** All nine surfaces are stable, versioned JSON
+  read-models (`logline.view.*.v0`) with `labkit` commands (added `schedule`,
+  `workbench`, `proof`). Contract: `docs/SURFACES.md`.
+- **A Lab is a directory on disk** (`--store`): `outbox/evidence/ghosts/
+  candidates.jsonl`, resumed identically across runs (`Lab::open`).
+- **Same map for human and LLM.** MCP read surfaces (`McpServer::read_surface`,
+  `grant_read`) return byte-identical JSON to the CLI; tested in `apps/mcp-server`.
+  Reads need grants; writes become draft Acts (LLMs propose, never decide).
+- Docs + runnable examples: `examples/human-and-llm/` (human-flow.sh, llm-flow.md);
+  `docs/HUMAN_EXPERIENCE.md`/`SURFACES.md`.
+- Contract + persistence tests added. **99 tests** pass; clippy clean.
+
 ## v0.2.0 — Lab formation kit (FINAL doc)
 
 Pivoted to `build-pack/final-real-project-doc.md`: an installable **Lab formation

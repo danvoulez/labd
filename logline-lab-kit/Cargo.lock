@@ -308,6 +308,7 @@ version = "0.1.0"
 dependencies = [
  "logline-act",
  "logline-lab-core",
+ "logline-lab-labd",
  "serde",
  "serde_json",
 ]

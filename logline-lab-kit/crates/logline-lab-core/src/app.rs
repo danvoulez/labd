@@ -16,6 +16,8 @@ pub enum AppError {
     UnknownApp(String),
     #[error("app `{app}` lacks grant for capability `{capability}`")]
     NotGranted { app: String, capability: String },
+    #[error("unknown surface `{0}`")]
+    UnknownSurface(String),
 }
 
 /// A registered app/entity and the capabilities it has been granted.
@@ -67,7 +69,13 @@ impl AppRegistry {
         Ok(())
     }
 
-    fn is_granted(&self, app_id: &str, capability: &str) -> bool {
+    /// Whether an app is registered.
+    pub fn is_registered(&self, app_id: &str) -> bool {
+        self.apps.contains_key(app_id)
+    }
+
+    /// Whether an app holds a capability grant.
+    pub fn is_granted(&self, app_id: &str, capability: &str) -> bool {
         self.apps
             .get(app_id)
             .map(|e| e.grants.iter().any(|g| g == capability))

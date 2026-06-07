@@ -3,11 +3,22 @@
 Acceptance gates **A01–A52** from `build-pack/final-real-project-doc.md` §20.
 A test is green only with command output / inspected evidence.
 
-**Verified:** `cargo test` = **94 passed, 0 failed** (whole workspace);
+**Verified:** `cargo test` = **99 passed, 0 failed** (whole workspace);
 `cargo clippy --workspace --all-targets` = **0 warnings**;
 `bash install/doctor.sh` runs offline conformance + a real first session on the
 basics (no pack). The end-to-end A01–A52 mapping lives in
 `crates/logline-lab-acceptance` (51 tests; `a24_a25` and `a49_a50` are combined).
+
+### Headless surface contracts (the final 30%)
+The nine experience surfaces are now headless-first contracts, not a UI:
+- Each surface returns a stable, versioned JSON read-model (`kind` tag) and has a
+  `labkit` command; see `docs/SURFACES.md`.
+- A Lab is a directory on disk (outbox/evidence/ghosts/candidates) and resumes
+  identically across runs — `surface_contracts::lab_directory_persists_full_reality`.
+- A human (CLI) and an LLM (MCP read tools) see **byte-identical** JSON —
+  `apps/mcp-server::human_and_llm_see_the_same_map`; ungranted reads are blocked.
+- Runnable proof: `examples/human-and-llm/human-flow.sh` (write → schedule → today
+  → workbench → proof → learn over one durable Lab).
 
 | ID | Acceptance test | Status | Evidence (test) | Module |
 |---|---|---|---|---|
