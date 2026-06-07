@@ -29,16 +29,20 @@ GREEN — labd reproduces the canon byte-for-byte.
 
 ================================================================
 # EXTERNAL CROSS-CHECK — foundation reference verifier (Node, zero-dep)
-# node v20.20.2 · verify-receipt.mjs --suite over the same vendored vectors
+# node v20.20.2 · verify-receipt.mjs --suite
 ================================================================
 
 21 passed, 0 failed
 
-# STATUS: labd 21/21 == reference 21/21 on the receipt suite.
-# Envelope primitive (logline-act::{Envelope,TransportMeta,envelope_hash,verify_envelope_value})
-# closes divergence #2. envelope-hash-mismatch (invalid) is still correctly rejected.
+# STATUS after P1 (JCS replacement via serde_json_canonicalizer 0.3.2):
+#   labd 21/21 == Node reference 21/21. Adversarial probe 7/7 CONFORMANT.
 #
-# REMAINING (not a vector failure): the hand-rolled canonicalizer is still NOT JCS.
-# See release/checks/jcs-adversarial-probe.txt — 4/7 adversarial cases diverge
-# (astral key order, integer-float, exponent threshold, negative zero). P1 (real
-# JCS) remains mandatory before C3 can be a real, permanent gate.
+# BEFORE/AFTER HASH STABILITY (rule 6):
+#   - Canon receipt vectors (20) + envelope (1): labd reproduces the embedded
+#     canon hashes both BEFORE (hand-roll, 20/20) and AFTER (JCS, 21/21).
+#     => tuple/content/envelope hashes are STABLE for canon-valid inputs.
+#   - Adversarial edge cases (astral keys, ES6 numbers, -0): hashes CHANGED,
+#     by design — the old hand-roll bytes were non-conformant. No admitted Act
+#     used those forms, so nothing stored is invalidated.
+#   - Old hand-roll retained ONLY as a #[cfg(test)] divergence fixture
+#     (logline-act::canonical::tests). No production path calls it.

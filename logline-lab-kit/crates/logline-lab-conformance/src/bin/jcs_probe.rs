@@ -1,11 +1,10 @@
 //! Adversarial JCS probe (evidence reporter, exits 0).
 //!
-//! Proves *why* labd's hand-rolled canonicalizer must be replaced even though the
-//! current receipt vectors pass 20/20: the vectors never exercise these edge cases.
-//! Each case is canonicalized by labd (`logline_act::canonical_json`) and compared to
-//! the canon-correct bytes produced by the foundation reference JCS (verified via
-//! `tools/verify-receipt.mjs`'s algorithm; ECMAScript number formatting + UTF-16
-//! code-unit key ordering, per RFC 8785).
+//! Exercises the RFC 8785 edge cases the receipt vectors do NOT cover (astral key
+//! ordering, ECMAScript number formatting). Pre-P1 this proved the hand-roll diverged;
+//! post-P1 (canonicalization delegated to `serde_json_canonicalizer`) it confirms labd
+//! now matches the canon-correct bytes byte-for-byte. The historical divergence is
+//! preserved in git and in `logline-act`'s `legacy_hand_roll_diverged_from_jcs` test.
 
 use logline_act::canonical_json;
 use serde_json::Value;
@@ -25,8 +24,8 @@ const CASES: &[(&str, &str, &str)] = &[
 ];
 
 fn main() {
-    println!("# Adversarial JCS probe — labd hand-roll vs canon-correct (RFC 8785)");
-    println!("# canon truth computed by the foundation reference JCS (verify-receipt.mjs algorithm)\n");
+    println!("# Adversarial JCS probe — labd canonicalization vs canon-correct (RFC 8785)");
+    println!("# labd: serde_json_canonicalizer (P1). canon truth: foundation reference JCS.\n");
 
     let mut diverge = 0usize;
     for (name, input, canon) in CASES {
@@ -50,12 +49,15 @@ fn main() {
     }
 
     let total = CASES.len();
-    println!("\n{diverge}/{total} cases DIVERGE from the canon.");
-    if diverge > 0 {
+    println!("\n{diverge}/{total} cases diverge from the canon.");
+    if diverge == 0 {
         println!(
-            "PROOF: the hand-rolled canonicalizer is NOT RFC 8785 / JCS. Replacing it (P1) is \
-             mandatory regardless of the receipt vectors passing 20/20 — those vectors simply do \
-             not contain astral keys or ECMAScript-formatted numbers."
+            "CONFORMANT: labd canonicalization matches RFC 8785 / JCS on every adversarial case, \
+             including the ones the receipt vectors do not exercise (astral keys, ECMAScript \
+             numbers). The historical hand-roll divergence is preserved in git and in \
+             logline-act::canonical::tests::legacy_hand_roll_diverged_from_jcs."
         );
+    } else {
+        println!("REGRESSION: labd diverges from the canon — P1 canonicalization is broken.");
     }
 }

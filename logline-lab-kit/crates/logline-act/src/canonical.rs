@@ -1,10 +1,12 @@
 //! Canonical JSON + content-addressed hashing.
 //!
-//! Recovered (rewritten standalone, no vendored dependency) from the LogLine
-//! Foundation `status` crate (`vendor/logline-foundation/engine/crates/status/
-//! src/receipt.rs`) found in the source fruits. Object keys are sorted; numbers,
-//! strings, and arrays are encoded deterministically so the same Act always
-//! produces the same bytes and therefore the same hash.
+//! Canonicalization is **RFC 8785 / JCS**, delegated to the vetted
+//! `serde_json_canonicalizer` crate (accepted by behavior against the foundation
+//! conformance vectors + adversarial probe + Node reference verifier — see
+//! `recovery/CONFORMANCE_PLAN.md` and `recovery/CANON_ERRATA.md`). The previously
+//! hand-rolled canonicalizer was NOT RFC 8785 (it sorted keys by Unicode scalar
+//! rather than UTF-16 code units and mis-formatted numbers); it survives only as a
+//! `#[cfg(test)]` fixture proving that divergence, never as a production path.
 
 use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
@@ -24,44 +26,10 @@ pub const SLOTS: [&str; 9] = [
     "status",
 ];
 
-/// Deterministic JSON encoding: object keys sorted lexically, no insignificant
-/// whitespace.
+/// Canonical JSON bytes per RFC 8785 (JCS): object keys sorted by UTF-16 code units,
+/// ECMAScript number formatting, minimal string escaping, no insignificant whitespace.
 pub fn canonical_json(value: &Value) -> Result<String, ActError> {
-    match value {
-        Value::Null => Ok("null".to_string()),
-        Value::Bool(b) => Ok(if *b { "true" } else { "false" }.to_string()),
-        Value::Number(n) => Ok(n.to_string()),
-        Value::String(s) => serde_json::to_string(s).map_err(|_| ActError::StringEncoding),
-        Value::Array(items) => {
-            let mut out = String::from("[");
-            for (i, item) in items.iter().enumerate() {
-                if i > 0 {
-                    out.push(',');
-                }
-                out.push_str(&canonical_json(item)?);
-            }
-            out.push(']');
-            Ok(out)
-        }
-        Value::Object(obj) => canonical_object(obj),
-    }
-}
-
-fn canonical_object(obj: &Map<String, Value>) -> Result<String, ActError> {
-    let mut keys: Vec<&String> = obj.keys().collect();
-    keys.sort();
-    let mut out = String::from("{");
-    for (i, key) in keys.iter().enumerate() {
-        if i > 0 {
-            out.push(',');
-        }
-        let k = serde_json::to_string(key).map_err(|_| ActError::StringEncoding)?;
-        out.push_str(&k);
-        out.push(':');
-        out.push_str(&canonical_json(&obj[*key])?);
-    }
-    out.push('}');
-    Ok(out)
+    serde_json_canonicalizer::to_string(value).map_err(|_| ActError::StringEncoding)
 }
 
 fn sha256_hex(canonical: &str) -> String {
@@ -115,4 +83,76 @@ pub fn content_hash(value: &Value) -> Result<String, ActError> {
     obj.remove("id");
     obj.remove("hashes");
     Ok(sha256_hex(&canonical_json(&v)?))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    /// The pre-P1 hand-rolled canonicalizer. **Test fixture ONLY** — kept to prove it
+    /// diverged from RFC 8785/JCS. It is not exported and no production code calls it.
+    fn legacy_hand_rolled(value: &Value) -> String {
+        match value {
+            Value::Null => "null".to_string(),
+            Value::Bool(b) => if *b { "true" } else { "false" }.to_string(),
+            Value::Number(n) => n.to_string(),
+            Value::String(s) => serde_json::to_string(s).unwrap(),
+            Value::Array(items) => {
+                let inner: Vec<String> = items.iter().map(legacy_hand_rolled).collect();
+                format!("[{}]", inner.join(","))
+            }
+            Value::Object(obj) => {
+                let mut keys: Vec<&String> = obj.keys().collect();
+                keys.sort();
+                let parts: Vec<String> = keys
+                    .iter()
+                    .map(|k| format!("{}:{}", serde_json::to_string(k).unwrap(), legacy_hand_rolled(&obj[*k])))
+                    .collect();
+                format!("{{{}}}", parts.join(","))
+            }
+        }
+    }
+
+    /// The adversarial inputs where RFC 8785 and the old hand-roll part ways, with the
+    /// canon-correct bytes (per the foundation reference verifier; see CANON_ERRATA E-001).
+    const ADVERSARIAL: &[(&str, &str)] = &[
+        (r#"{"𐀀":1,"￿":2}"#, "{\"\u{10000}\":1,\"\u{FFFF}\":2}"), // UTF-16 key order
+        (r#"{"n":1.0}"#, r#"{"n":1}"#),                            // integer-valued float
+        (r#"{"n":100000000000000000000}"#, r#"{"n":100000000000000000000}"#), // exponent threshold
+        (r#"{"n":-0}"#, r#"{"n":0}"#),                             // negative zero
+        (r#"{"n":1e21}"#, r#"{"n":1e+21}"#),                       // exponent sign (E-001)
+    ];
+
+    /// Production canonicalization now matches the canon byte-for-byte on every
+    /// adversarial case (this is the JCS conformance guarantee).
+    #[test]
+    fn jcs_matches_canon_on_adversarial_inputs() {
+        for (input, want) in ADVERSARIAL {
+            let v: Value = serde_json::from_str(input).unwrap();
+            assert_eq!(&canonical_json(&v).unwrap(), want, "input {input}");
+        }
+    }
+
+    /// The old hand-roll genuinely diverged on those same inputs — kept live so the
+    /// reason we replaced it cannot be lost. If this ever stops diverging, the fixture
+    /// is wrong, not the canon.
+    #[test]
+    fn legacy_hand_roll_diverged_from_jcs() {
+        let mut diverged = 0;
+        for (input, _want) in ADVERSARIAL {
+            let v: Value = serde_json::from_str(input).unwrap();
+            if legacy_hand_rolled(&v) != canonical_json(&v).unwrap() {
+                diverged += 1;
+            }
+        }
+        assert!(diverged >= 4, "expected the legacy hand-roll to diverge on most cases, got {diverged}");
+    }
+
+    /// The JCS worked example from the canon hash-profile.
+    #[test]
+    fn jcs_worked_example() {
+        let v = json!({ "b": 2, "a": [1, 0.5], "c": "hi" });
+        assert_eq!(canonical_json(&v).unwrap(), r#"{"a":[1,0.5],"b":2,"c":"hi"}"#);
+    }
 }

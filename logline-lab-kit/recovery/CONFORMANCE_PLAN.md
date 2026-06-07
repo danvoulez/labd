@@ -151,10 +151,17 @@ own Node verifier. Buy-don't-build and the Act/projection invariant hold through
 
 ### Progress (2026-06-07)
 - ✅ **Adversarial JCS probe** added (`src/bin/jcs_probe.rs` +
-  `release/checks/jcs-adversarial-probe.txt` + `#[ignore]` test). Proven: 4/7 cases diverge.
+  `release/checks/jcs-adversarial-probe.txt` + test). Pre-P1: 4/7 diverge.
 - ✅ **Envelope primitive** in `logline-act` (`Envelope`, `TransportMeta`, `envelope_hash`,
-  `verify_envelope_value`). Harness now verifies envelopes for real → **labd 21/21 ==
-  reference 21/21**. Envelope is a transport wrapper only: `envelope_hash` never inside
-  content, transport never becomes Act semantics.
-- ⏳ **P1 JCS replacement** — next; the only thing between here and a real (never-red) C3 gate.
-- ⏳ **C3 gate** — wired ONLY after JCS is green. No known-red exceptions.
+  `verify_envelope_value`). Harness verifies envelopes for real → **labd 21/21 ==
+  reference 21/21**. Transport wrapper only: hash never inside content, transport never
+  becomes Act semantics.
+- ✅ **P1 JCS replacement** — `canonical_json` delegates to `serde_json_canonicalizer`
+  =0.3.2 (vetted by behavior, not name; via `ryu-js` for ECMAScript numbers). Adversarial
+  probe now **7/7 CONFORMANT** and un-ignored in the normal suite. Old hand-roll demoted to
+  a `#[cfg(test)]` divergence fixture (no production path). Canon prose erratum E-001
+  recorded (`recovery/CANON_ERRATA.md`: exponent sign `1e+21`, reference wins over prose).
+  Hash stability: canon-valid vectors unchanged; only non-conformant edge-case bytes changed
+  (nothing admitted relied on them). 118 tests pass, clippy clean, doctor + fixture green.
+- ⏳ **C3 gate** — now unblocked (no known-red). Wire as a hard CI/release gate:
+  Rust harness + Node cross-check + drift check + full tests + clippy -D.

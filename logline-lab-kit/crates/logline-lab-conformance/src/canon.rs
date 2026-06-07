@@ -212,16 +212,14 @@ mod tests {
         assert_eq!(logline_act::canonical_json(&v).unwrap(), r#"{"a":[1,0.5],"b":2,"c":"hi"}"#);
     }
 
-    /// Adversarial JCS conformance — **EXPECTED-RED until P1 (JCS replacement)**.
+    /// Adversarial JCS conformance — now part of the normal suite (P1 landed).
     ///
-    /// Proof that labd's hand-rolled canonicalizer is NOT RFC 8785 / JCS, even though
-    /// the receipt vectors pass 20/20 (they contain no astral keys or ECMAScript-
-    /// formatted numbers). Marked `#[ignore]` so it does not break the green suite;
-    /// run `cargo test -p logline-lab-conformance -- --ignored` to see the divergence.
-    /// When P1 lands a conformant JCS impl, remove `#[ignore]` — it must then pass.
-    /// Full evidence: `release/checks/jcs-adversarial-probe.txt`.
+    /// labd's canonicalization (RFC 8785 via `serde_json_canonicalizer`) must match the
+    /// canon byte-for-byte on the edge cases the receipt vectors do not exercise: astral
+    /// key ordering, integer-valued floats, the exponent threshold, negative zero, and
+    /// the exponent sign (CANON_ERRATA E-001). Full evidence:
+    /// `release/checks/jcs-adversarial-probe.txt`.
     #[test]
-    #[ignore = "expected-red until P1 JCS replacement; proves the hand-roll diverges from RFC 8785"]
     fn jcs_adversarial_matches_canon() {
         // (input JSON, canon-correct canonicalization per the foundation reference JCS)
         let cases = [
