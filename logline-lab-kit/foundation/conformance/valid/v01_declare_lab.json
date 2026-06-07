@@ -1,0 +1,1 @@
+{"who":"lab.operator","did":"declare_lab","this":{"lab_id":"ref.local.lab"},"when":"2026-06-07T00:00:00Z","confirmed_by":"none","if_ok":"record_declaration","if_doubt":"carry_as_blocked_act","if_not":"reject_declaration","status":"candidate"}

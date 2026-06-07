@@ -1,0 +1,5 @@
+{
+  "name": "postgres-default",
+  "spine": "postgres",
+  "settings": { "url": "postgres://localhost/logline", "note": "Stock Postgres spine; apply profiles/supabase-default/migrations 0001-0012." }
+}

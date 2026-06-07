@@ -68,12 +68,23 @@ impl ProfileManifest {
     }
 }
 
-/// A Lab instance: identity + chosen profile + chosen pack.
+/// A Lab instance: identity + chosen profile, plus *optional* packs.
+///
+/// A Lab needs only an identity and a profile to form and run a first session —
+/// that is "the basics". Packs are purely additive complements (Operator/FINAL
+/// §15): `pack` may be absent, a single name, or several (`packs`). This is a
+/// permanent architectural choice, not a convenience: the kit must be useful
+/// before any pack is loaded.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct LabManifest {
     pub lab_id: String,
     pub profile: String,
-    pub pack: String,
+    /// Optional single pack (back-compat / common case).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pack: Option<String>,
+    /// Optional additional packs.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub packs: Vec<String>,
     #[serde(default)]
     pub settings: Value,
 }
@@ -85,6 +96,20 @@ impl LabManifest {
         if m.lab_id.trim().is_empty() {
             return Err(ManifestError::MissingField("lab_id"));
         }
+        if m.profile.trim().is_empty() {
+            return Err(ManifestError::MissingField("profile"));
+        }
         Ok(m)
+    }
+
+    /// Every pack this Lab requests (single + list), de-duplicated in order.
+    pub fn all_packs(&self) -> Vec<String> {
+        let mut out: Vec<String> = Vec::new();
+        for p in self.pack.iter().chain(self.packs.iter()) {
+            if !out.contains(p) {
+                out.push(p.clone());
+            }
+        }
+        out
     }
 }

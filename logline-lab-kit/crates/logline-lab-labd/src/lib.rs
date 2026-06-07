@@ -1,24 +1,36 @@
-//! `logline-lab-labd` — the generic Lab host.
+//! `logline-lab-labd` — the resident Lab host.
 //!
-//! `labd` is the runtime that holds a Lab's identity (manifest), its chosen pack
-//! and profile, a local outbox, and a spine. It exposes the generic Lab API:
-//! emit, sync, attach evidence, prepare receipt candidates, project, report, and
-//! doctor. It is generic machinery — no pack-specific or Dan-specific semantics
-//! (Operator §13).
+//! `labd` keeps a Lab alive: identity (manifest), an optional set of packs, a
+//! profile, a local outbox, a spine, evidence, and ghosts. It exposes the
+//! generic Lab API and the nine **experience surfaces** (FINAL §11) as library
+//! functions — Start, Today, Timeline, Write, Schedule, Workbench, Proof, Learn,
+//! Settings — so any surface (CLI/MCP/web/TUI) can wrap the same grammar.
+//!
+//! The basics stand alone: a Lab forms and completes a first session with only
+//! an identity and a profile. Packs are additive complements (FINAL §15).
 
 #![forbid(unsafe_code)]
 
+mod experience;
+
+pub use experience::{
+    ProofView, SettingsView, StartView, TimelineView, TodayView, WorkbenchRun, WriteOutcome,
+};
+
 use logline_act::Act;
+use logline_lab_conformance::{builtin_vectors, run as run_conformance, ConformanceReport};
 use logline_lab_core::{
     evidence::{Evidence, EvidenceLog},
+    ghost::{Ghost, GhostLog},
     receipt::{ReceiptCandidate, ReceiptError},
     LabManifest, PackManifest, ProfileManifest,
 };
 use logline_lab_local::{EmitOutcome, LocalError, LocalOutbox};
-use logline_lab_reports::{generate, LabReport};
+use logline_lab_reports::{generate, generate_learning, LabReport, LearningReport};
 use logline_lab_spine::{sync, MemorySpine, Spine, SpineError, StoredAct, SyncReport};
 use logline_lab_supabase::{SupabaseConfig, SupabaseSpine};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -37,59 +49,68 @@ pub enum LabError {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct DoctorReport {
     pub lab_id: String,
-    pub pack: String,
+    pub packs: Vec<String>,
     pub profile: String,
     pub spine_kind: String,
     pub outbox_entries: usize,
     pub unsynced: usize,
     pub spine_acts: usize,
+    pub conformance_green: bool,
     pub ok: bool,
 }
 
 /// A running Lab.
 pub struct Lab {
     manifest: LabManifest,
-    pack: PackManifest,
+    packs: Vec<PackManifest>,
     profile: ProfileManifest,
     outbox: LocalOutbox,
     spine: Box<dyn Spine>,
     evidence: EvidenceLog,
+    ghosts: GhostLog,
+    /// Ugly candidates preserved by Write before they could become valid Acts.
+    candidates: Vec<Value>,
 }
 
 impl Lab {
-    /// Initialize a Lab from its manifest, pack, and profile. The profile selects
-    /// the spine adapter without changing core (A15).
+    /// Initialize a Lab from its manifest, optional packs, and profile. With no
+    /// packs this is "the basics" — still fully usable. The profile selects the
+    /// spine without changing core (A08).
     pub fn init(
         manifest: LabManifest,
-        pack: PackManifest,
+        packs: Vec<PackManifest>,
         profile: ProfileManifest,
     ) -> Result<Self, LabError> {
         let spine = Self::spine_for(&profile)?;
         Ok(Self {
             manifest,
-            pack,
+            packs,
             profile,
             outbox: LocalOutbox::in_memory(),
             spine,
             evidence: EvidenceLog::new(),
+            ghosts: GhostLog::new(),
+            candidates: Vec::new(),
         })
     }
 
     /// Same as `init` but with a file-backed outbox for durability.
     pub fn init_with_outbox(
         manifest: LabManifest,
-        pack: PackManifest,
+        packs: Vec<PackManifest>,
         profile: ProfileManifest,
         outbox_path: impl AsRef<std::path::Path>,
     ) -> Result<Self, LabError> {
         let spine = Self::spine_for(&profile)?;
         Ok(Self {
             manifest,
-            pack,
+            packs,
             profile,
             outbox: LocalOutbox::open(outbox_path)?,
             spine,
             evidence: EvidenceLog::new(),
+            ghosts: GhostLog::new(),
+            candidates: Vec::new(),
         })
     }
 
@@ -110,18 +131,16 @@ impl Lab {
                     .unwrap_or("SUPABASE_SERVICE_KEY")
                     .to_string(),
             }))),
-            other => Err(LabError::UnknownSpine(
-                other.to_string(),
-                profile.name.clone(),
-            )),
+            other => Err(LabError::UnknownSpine(other.to_string(), profile.name.clone())),
         }
     }
 
+    // --- accessors ---
     pub fn lab_id(&self) -> &str {
         &self.manifest.lab_id
     }
-    pub fn pack(&self) -> &PackManifest {
-        &self.pack
+    pub fn packs(&self) -> &[PackManifest] {
+        &self.packs
     }
     pub fn profile(&self) -> &ProfileManifest {
         &self.profile
@@ -132,52 +151,68 @@ impl Lab {
     pub fn evidence(&self) -> &EvidenceLog {
         &self.evidence
     }
+    pub fn ghosts(&self) -> &GhostLog {
+        &self.ghosts
+    }
+    pub fn candidates(&self) -> &[Value] {
+        &self.candidates
+    }
 
-    /// Emit an Act into the local outbox.
+    // --- core API ---
     pub fn emit(&mut self, act: &Act) -> Result<EmitOutcome, LabError> {
         Ok(self.outbox.emit(act)?)
     }
-
-    /// Sync the outbox to the configured spine.
     pub fn sync(&mut self) -> Result<SyncReport, LabError> {
         Ok(sync(&mut self.outbox, self.spine.as_mut())?)
     }
 
-    /// Attach evidence to a scope.
+    /// Rebuild the spine from the durable outbox (idempotent). The file-backed
+    /// outbox is the resumable source of state across runs; the spine is a
+    /// derived store, never the truth.
+    pub fn rehydrate(&mut self) -> Result<usize, LabError> {
+        let acts: Vec<Act> = self.outbox.list().iter().map(|e| e.act.clone()).collect();
+        for a in &acts {
+            self.spine.ingest(a)?;
+        }
+        Ok(acts.len())
+    }
     pub fn attach_evidence(&mut self, evidence: Evidence) {
         self.evidence.attach(evidence);
     }
-
-    /// Prepare a scoped receipt candidate (requires evidence).
-    pub fn prepare_receipt(
-        &self,
-        act: &Act,
-        scope: &str,
-    ) -> Result<ReceiptCandidate, LabError> {
+    pub fn record_ghost(&mut self, ghost: Ghost) {
+        self.ghosts.record(ghost);
+    }
+    pub fn prepare_receipt(&self, act: &Act, scope: &str) -> Result<ReceiptCandidate, LabError> {
         Ok(ReceiptCandidate::prepare(act, scope, &self.evidence)?)
     }
-
-    /// Read an Act back from the spine.
     pub fn get(&self, content_hash: &str) -> Option<StoredAct> {
         self.spine.get(content_hash)
     }
-
-    /// Generate a Lab report from projections.
     pub fn report(&self, now: &str) -> LabReport {
         generate(self.spine.as_ref(), &self.manifest.lab_id, now)
     }
+    pub fn learning(&self, now: &str) -> LearningReport {
+        generate_learning(self.spine.as_ref(), &self.ghosts, &self.manifest.lab_id, now)
+    }
 
-    /// Doctor: inspect the Lab's wiring.
+    /// Run the built-in protocol conformance suite (offline).
+    pub fn conformance(&self) -> ConformanceReport {
+        run_conformance(&builtin_vectors())
+    }
+
+    /// Doctor: inspect the Lab's wiring (includes an offline conformance check).
     pub fn doctor(&self) -> DoctorReport {
+        let conformance_green = self.conformance().is_green();
         DoctorReport {
             lab_id: self.manifest.lab_id.clone(),
-            pack: self.pack.name.clone(),
+            packs: self.packs.iter().map(|p| p.name.clone()).collect(),
             profile: self.profile.name.clone(),
             spine_kind: self.spine.kind().to_string(),
             outbox_entries: self.outbox.len(),
             unsynced: self.outbox.unsynced().len(),
             spine_acts: self.spine.all().len(),
-            ok: true,
+            conformance_green,
+            ok: conformance_green,
         }
     }
 }
@@ -187,15 +222,12 @@ mod tests {
     use super::*;
     use serde_json::json;
 
-    fn lab() -> Lab {
-        let manifest = LabManifest::load(
-            r#"{"lab_id":"test.local.lab","profile":"local-only","pack":"demo"}"#,
-        )
-        .unwrap();
-        let pack = PackManifest::load(r#"{"name":"demo","version":"0.1.0"}"#).unwrap();
-        let profile =
-            ProfileManifest::load(r#"{"name":"local-only","spine":"memory"}"#).unwrap();
-        Lab::init(manifest, pack, profile).unwrap()
+    pub(crate) fn basics_lab() -> Lab {
+        // The basics: identity + profile, NO pack.
+        let manifest =
+            LabManifest::load(r#"{"lab_id":"basics.local.lab","profile":"local-only"}"#).unwrap();
+        let profile = ProfileManifest::load(r#"{"name":"local-only","spine":"memory"}"#).unwrap();
+        Lab::init(manifest, vec![], profile).unwrap()
     }
 
     fn act(did: &str) -> Act {
@@ -212,32 +244,27 @@ mod tests {
         )
     }
 
+    /// Basics-first: a Lab with no pack still emits, syncs, reports (A06/A11/A12).
     #[test]
-    fn lab_end_to_end_emit_sync_report() {
-        let mut lab = lab();
+    fn basics_lab_runs_without_a_pack() {
+        let mut lab = basics_lab();
+        assert!(lab.packs().is_empty());
         let outcome = lab.emit(&act("declare_lab")).unwrap();
         lab.sync().unwrap();
         assert!(lab.get(outcome.content_hash()).is_some());
-
-        let report = lab.report("2026-06-06T12:00:00Z");
-        assert_eq!(report.total_acts, 1);
-
-        let doctor = lab.doctor();
-        assert_eq!(doctor.spine_kind, "memory");
-        assert_eq!(doctor.spine_acts, 1);
-        assert_eq!(doctor.unsynced, 0);
+        assert_eq!(lab.report("t0").total_acts, 1);
+        assert!(lab.doctor().conformance_green);
     }
 
     #[test]
     fn supabase_profile_selects_supabase_spine() {
         let manifest =
-            LabManifest::load(r#"{"lab_id":"x","profile":"supabase","pack":"demo"}"#).unwrap();
-        let pack = PackManifest::load(r#"{"name":"demo"}"#).unwrap();
+            LabManifest::load(r#"{"lab_id":"x","profile":"supabase-default"}"#).unwrap();
         let profile = ProfileManifest::load(
-            r#"{"name":"supabase","spine":"supabase","settings":{"url":"https://x.supabase.co"}}"#,
+            r#"{"name":"supabase-default","spine":"supabase","settings":{"url":"https://x.supabase.co"}}"#,
         )
         .unwrap();
-        let lab = Lab::init(manifest, pack, profile).unwrap();
+        let lab = Lab::init(manifest, vec![], profile).unwrap();
         assert_eq!(lab.doctor().spine_kind, "supabase");
     }
 }

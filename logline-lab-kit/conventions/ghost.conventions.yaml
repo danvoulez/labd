@@ -1,0 +1,11 @@
+# Ghost conventions (FINAL §9.3). A ghost is named missing proof, not a failure.
+version: 0
+fields:
+  - id
+  - scope
+  - missing_proof
+  - owner
+  - blocks
+  - next_action
+  - closure_condition
+rule: "No ghost may be silently closed or become implementation truth."

@@ -1,0 +1,5 @@
+# Receipt conventions (FINAL §6). Receipts close only what was proven.
+version: 0
+requires:
+  - "at least one evidence item attached to the exact scope"
+scope_rule: "A receipt candidate closes only its declared scope and no other."

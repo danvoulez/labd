@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Conformance Vector",
+  "type": "object",
+  "required": ["id", "expectation", "act_json"],
+  "properties": {
+    "id": { "type": "string" },
+    "expectation": { "type": "string", "enum": ["valid", "invalid", "ambiguous"] },
+    "act_json": { "type": "string", "description": "The Act under test, as a JSON string." }
+  }
+}

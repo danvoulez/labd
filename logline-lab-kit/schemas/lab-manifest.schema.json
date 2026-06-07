@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Lab Manifest",
+  "type": "object",
+  "required": ["lab_id", "profile"],
+  "properties": {
+    "lab_id": { "type": "string", "minLength": 1 },
+    "profile": { "type": "string", "minLength": 1 },
+    "pack": { "type": "string", "description": "Optional single pack. Packs are additive complements; the basics need none." },
+    "packs": { "type": "array", "items": { "type": "string" }, "description": "Optional additional packs." },
+    "settings": { "type": "object" }
+  }
+}

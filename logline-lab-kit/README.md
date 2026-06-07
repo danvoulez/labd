@@ -1,102 +1,96 @@
 # LogLine Lab Kit
 
-> LogLine Lab Kit is the instrument. Packs are the music. Profiles are the stage.
-> Workers are the hands. Apps are the doors. Labs are the performances. Acts are
-> the record. Receipts close only what was proven.
+> Build the Lab formation kit, not a company product. Keep Act as the only
+> semantic unit. Make Labs the adoption unit. Make conformance the proof of
+> protocol. Use time, proof, science, and experience to help Labs study LogLine
+> seriously.
 
-LogLine Lab Kit is an **installable Act machine**. It lets you initialize a Lab,
-emit Acts, validate them, store them, project them, block them, attach evidence,
-prepare scoped receipts, load packs/profiles, run workers, expose CLI/MCP
-surfaces, and generate reports.
+LogLine Lab Kit is **one project** (`logline-lab-kit`): an installable kit for
+forming **Labs** that study, practice, test, prove, and transmit LogLine through
+**LogLine Acts**. The public goal is to let people instantiate real Labs; the
+strategic goal is to make LogLine a **protocol, not a company**.
 
-This is a **complete, right-sized v0** — not a minimal demo, and not a maximal
-everything-machine.
+The controlling definition is [`build-pack/final-real-project-doc.md`](build-pack/final-real-project-doc.md).
+
+## Basics first; packs complement
+
+A Lab forms and completes a first session with only an **identity + a profile** —
+no pack required. Packs (`santo-andre`, `manhattan`, `course-starter`) are
+**additive complements** that never change core.
+
+```sh
+labkit session \
+  --lab examples/manifests/lab.json \
+  --profile profiles/local-only/profile.json \
+  --act examples/acts/first.act.json
+```
 
 ## The Act
 
-Everything consequential starts as a LogLine Act. The canonical Act has **exactly
-nine slots** — there is no tenth slot:
+The canonical Act has **exactly nine slots** — there is no tenth:
 
-```txt
+```
 who  did  this  when  confirmed_by  if_ok  if_doubt  if_not  status
 ```
 
-Hashes, signatures, runtime data, selected branch, storage timestamps, and
-envelopes live *around* the Act, never inside it. Files, JSON exports, SQLite
-rows, UI state, reports, and provider responses are **not** semantic truth.
-
-## Repository shape
-
-```txt
-build-pack/    the build control surface (authority for this project)
-crates/        the Lab Kit core (Rust)
-schemas/       the Act JSON schema and friends
-profiles/      infrastructure choices (local-only, supabase, postgres, ...)
-packs/         opinionated conventions (demo, santo-andre, manhattan)
-packages/      optional app surfaces (mcp-server, model-middleware, ts-spine-client)
-apps/          optional adapters (pitwall, cockpit)
-runtimes/      optional workers (shell-worker, hermes, openclaw, manhattan)
-deploy/        real-world machine/cloud configuration
-recovery/      recovery scans + the Phase-0 assembly documents
-install/        install / uninstall / doctor
-release/       release artifacts + checksums
-docs/          atlas, reference, archive context
-```
+Everything else is envelope, convention, projection, pack, profile, app,
+runtime, or deployment. Files, JSON, SQLite rows, reports, and model output are
+**not** semantic truth. Capture is generous (ugly candidates allowed); promotion
+is strict (see [`docs/ACT_CANON.md`](docs/ACT_CANON.md)).
 
 ## Core crates
 
 | Crate | Responsibility |
 |---|---|
 | `logline-act` | Nine-slot Act, candidate mode, canonical JSON, hashing |
-| `logline-lab-core` | Branch/verdict, evidence, blocked Acts, receipt candidates, manifests, app boundary |
-| `logline-lab-local` | Provisional local outbox/cache (never truth) |
+| `logline-lab-core` | Branch/verdict, evidence, blocked Acts, receipt candidates, **study benches**, **ghosts**, manifests, app boundary |
+| `logline-lab-local` | Provisional outbox/cache (never truth) |
 | `logline-lab-spine` | Generic spine trait + in-memory spine + sync |
 | `logline-lab-supabase` | Supabase/Postgres profile adapter (content-addressed ingest) |
 | `logline-lab-projectors` | Read models (recent, registry, blocked, health) |
-| `logline-lab-clock` | Tick, due checks, reschedule |
+| `logline-lab-clock` | Tick, due, reschedule |
+| `logline-lab-ruler` | Due/overdue/blocked, **capacity band**, next-study |
 | `logline-lab-hooks` | Hook runner |
-| `logline-lab-dispatch` | Worker contract + shell worker (returns evidence, not closure) |
-| `logline-lab-reports` | Report generator (a report is never a receipt) |
+| `logline-lab-dispatch` | Worker contract + shell worker (evidence, not closure) |
+| `logline-lab-reports` | Lab report + **learning report** (never a receipt) |
+| `logline-lab-conformance` | Reference vectors, runner, exportable examples |
 | `logline-lab-cli` | `labkit` command surface |
-| `logline-lab-labd` | The generic Lab host |
+| `logline-lab-labd` | Lab host + the nine experience surfaces |
+
+## Experience surfaces
+
+Start · Today · Timeline · Write · Schedule · Workbench · Proof · Learn ·
+Settings — library functions on the Lab host, wrapped by `labkit`. The surface is
+flexible; the grammar is not (see [`docs/HUMAN_EXPERIENCE.md`](docs/HUMAN_EXPERIENCE.md)).
+
+## Protocol & conformance
+
+```sh
+labkit conformance      # runs offline; exits non-zero if not green
+```
+
+Vectors live in `foundation/conformance/`; valid examples export with a
+deterministic `content_hash` so another Lab can compare behavior — no central
+service required ([`docs/PROTOCOL_STRATEGY.md`](docs/PROTOCOL_STRATEGY.md)).
 
 ## Quick start
 
 ```sh
-# build + install the CLI and the recovery scanner
-bash install/install.sh
-
-# verify the toolchain and run a real example session
-bash install/doctor.sh
-
-# show the nine slots
-labkit slots
-
-# run a Lab session
-labkit session \
-  --lab examples/manifests/lab.json \
-  --pack packs/demo/pack.json \
-  --profile profiles/local-only/profile.json \
-  --act examples/acts/first.act.json
+bash install/install.sh    # build + install labkit and recovery-scan
+bash install/doctor.sh     # toolchain + offline conformance + a real first session
+labkit slots               # show the nine slots
+cargo test                 # acceptance A01-A52
 ```
 
 ## Acceptance
 
-The build is gated by acceptance tests **A1–A30** (see
-`build-pack/05_ACCEPTANCE_TESTS.md`). Current verified status lives in
-`recovery/ACCEPTANCE_STATUS.md`. Run the whole suite:
-
-```sh
-cargo test
-```
+Gated by **A01–A52** (`build-pack/final-real-project-doc.md` §20). Verified status
+in [`recovery/ACCEPTANCE_STATUS.md`](recovery/ACCEPTANCE_STATUS.md).
 
 ## Boundaries (do not cross)
 
-- The project root is `logline-lab-kit`. Santo André, Manhattan, and Minilab are
-  packs/contexts, **not** the product.
-- Packs and profiles load as **data**; loading one never changes core.
-- Workers return **evidence**, never closure. Receipts close only what evidence
-  proves.
-- Source material under recovery is raw material, not authority.
-
-See `build-pack/OPERATOR_PROMPT_V2.md` for the full closed boundary.
+Root stays `logline-lab-kit`. Act is the only semantic unit. No native domain
+objects, no artifact-as-truth, no file/SQLite truth, no central-service
+requirement. Packs/profiles are additive; workers return evidence not closure;
+receipts close only what evidence proves; ghosts are named, never silently
+closed. See [`docs/`](docs/) and `build-pack/`.

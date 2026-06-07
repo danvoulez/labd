@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Pack Manifest",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string" },
+    "did_vocabulary": { "type": "array", "items": { "type": "string" } },
+    "scopes": { "type": "array", "items": { "type": "string" } },
+    "extra": { "type": "object" }
+  },
+  "description": "A pack adds practice (did vocabulary, scopes, benches) without changing core. It is never canon."
+}

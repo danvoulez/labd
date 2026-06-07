@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Profile Manifest",
+  "type": "object",
+  "required": ["name", "spine"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "spine": { "type": "string", "enum": ["memory", "local", "local-only", "postgres", "supabase"] },
+    "settings": { "type": "object", "description": "Infrastructure config; secrets are referenced by env var name, never embedded." }
+  }
+}

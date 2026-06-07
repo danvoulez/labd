@@ -1,0 +1,9 @@
+{
+  "name": "course-starter",
+  "version": "0.1.0",
+  "did_vocabulary": ["declare_lab", "assign_exercise", "submit_solution", "grade"],
+  "scopes": ["course.module", "course.exercise"],
+  "extra": {
+    "description": "Teaching pack for a course Lab. A pack, not canon (FINAL §8.3)."
+  }
+}

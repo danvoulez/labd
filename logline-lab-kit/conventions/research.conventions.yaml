@@ -1,0 +1,14 @@
+# Research conventions — the scientific cycle expressed as Acts (FINAL §9).
+version: 0
+cycle:
+  - observe
+  - question
+  - hypothesize
+  - design_probe
+  - schedule_or_run_probe
+  - collect_evidence
+  - compare_result
+  - verdict
+  - close_receipt_or_preserve_ghost
+  - learn_next_action
+rule: "If it matters semantically, it must be expressible as LogLine Acts."

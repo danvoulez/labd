@@ -6,16 +6,20 @@
 #![forbid(unsafe_code)]
 
 pub mod app;
+pub mod bench;
 pub mod blocked;
 pub mod branch;
 pub mod evidence;
+pub mod ghost;
 pub mod manifest;
 pub mod receipt;
 
 pub use app::{AppCall, AppError, AppRegistry};
+pub use bench::{BenchOutcome, StudyBench};
 pub use blocked::{evaluate as evaluate_blocked, BlockContext, BlockReason, BlockedAct};
 pub use branch::{select_branch, Verdict};
 pub use evidence::{Evidence, EvidenceLog};
+pub use ghost::{Ghost, GhostLog};
 pub use manifest::{LabManifest, ManifestError, PackManifest, ProfileManifest};
 pub use receipt::{ReceiptCandidate, ReceiptError};
 

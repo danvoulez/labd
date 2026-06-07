@@ -198,14 +198,15 @@ version = "0.1.0"
 dependencies = [
  "logline-act",
  "logline-lab-clock",
+ "logline-lab-conformance",
  "logline-lab-core",
  "logline-lab-dispatch",
  "logline-lab-labd",
  "logline-lab-mcp-server",
  "logline-lab-projectors",
  "logline-lab-recovery-scanner",
+ "logline-lab-ruler",
  "logline-lab-spine",
- "logline-lab-supabase",
  "serde",
  "serde_json",
 ]
@@ -217,6 +218,7 @@ dependencies = [
  "anyhow",
  "clap",
  "logline-act",
+ "logline-lab-conformance",
  "logline-lab-core",
  "logline-lab-labd",
  "logline-lab-recovery-scanner",
@@ -226,6 +228,15 @@ dependencies = [
 
 [[package]]
 name = "logline-lab-clock"
+version = "0.1.0"
+dependencies = [
+ "logline-act",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "logline-lab-conformance"
 version = "0.1.0"
 dependencies = [
  "logline-act",
@@ -267,10 +278,13 @@ name = "logline-lab-labd"
 version = "0.1.0"
 dependencies = [
  "logline-act",
+ "logline-lab-clock",
+ "logline-lab-conformance",
  "logline-lab-core",
  "logline-lab-local",
  "logline-lab-projectors",
  "logline-lab-reports",
+ "logline-lab-ruler",
  "logline-lab-spine",
  "logline-lab-supabase",
  "serde",
@@ -326,6 +340,19 @@ dependencies = [
  "logline-lab-core",
  "logline-lab-local",
  "logline-lab-projectors",
+ "logline-lab-spine",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "logline-lab-ruler"
+version = "0.1.0"
+dependencies = [
+ "logline-act",
+ "logline-lab-clock",
+ "logline-lab-core",
+ "logline-lab-local",
  "logline-lab-spine",
  "serde",
  "serde_json",

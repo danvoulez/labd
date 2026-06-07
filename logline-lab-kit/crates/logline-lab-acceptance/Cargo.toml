@@ -11,10 +11,11 @@ logline-lab-core.workspace = true
 logline-lab-labd.workspace = true
 logline-lab-projectors.workspace = true
 logline-lab-clock.workspace = true
+logline-lab-ruler.workspace = true
 logline-lab-dispatch.workspace = true
 logline-lab-spine.workspace = true
-logline-lab-supabase.workspace = true
-logline-lab-mcp-server = { path = "../../packages/mcp-server" }
+logline-lab-conformance.workspace = true
+logline-lab-mcp-server = { path = "../../apps/mcp-server" }
 logline-lab-recovery-scanner = { path = "../../recovery/scanner" }
 serde.workspace = true
 serde_json.workspace = true

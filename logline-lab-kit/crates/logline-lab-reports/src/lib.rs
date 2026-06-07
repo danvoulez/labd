@@ -7,6 +7,9 @@
 
 #![forbid(unsafe_code)]
 
+pub mod learning;
+pub use learning::{generate_learning, LearningReport};
+
 use logline_lab_projectors::{recent, registry, RegistryRow};
 use logline_lab_spine::Spine;
 use serde::{Deserialize, Serialize};

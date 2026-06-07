@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.2.0 — Lab formation kit (FINAL doc)
+
+Pivoted to `build-pack/final-real-project-doc.md`: an installable **Lab formation
+kit** for studying LogLine as a **protocol, not a company**. Evolution, not
+teardown — see `recovery/MIGRATION_TO_FINAL_DOC.md`.
+
+- **Basics first; packs complement.** `pack` is optional; the demo pack was
+  removed — a Lab runs a first session on identity + profile alone.
+- New crates: `logline-lab-ruler` (due/overdue/blocked/capacity), `logline-lab-
+  conformance` (vectors/runner/export).
+- New domain: study `bench` + `ghost` in core; `learning` report.
+- Nine **experience surfaces** (Start/Today/Timeline/Write/Schedule/Workbench/
+  Proof/Learn/Settings) as library functions + `labkit` subcommands.
+- 10 schemas, 7 conventions, 11 docs, conformance vectors, restructured
+  deployments/profiles/apps/runtimes.
+- Acceptance **A01–A52** green; **94 tests** pass; clippy clean.
+
 ## v0.1.0 — first assembled v0
 
 Recovered and assembled from `LOG_LINE_LAB_KIT_BUILD_PACKAGE_V2` per

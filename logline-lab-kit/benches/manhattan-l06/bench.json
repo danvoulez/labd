@@ -1,0 +1,13 @@
+{
+  "id": "manhattan-l06",
+  "question": "Is the L-06 Ethernet link healthy?",
+  "hypothesis": "The link is up and a probe returns successfully.",
+  "inputs": {"target": "peer"},
+  "procedure": "Run an allowed link probe and capture its output.",
+  "expected": "Probe runs and returns output.",
+  "success_criteria": "Probe output captured as evidence.",
+  "failure_criteria": "No probe output captured.",
+  "receipt_scope": "manhattan.L-06",
+  "ghost_policy": "Real fleet Ethernet ping is ghosted (G-08): mechanism proven with a local probe.",
+  "allowed_tools": ["sh"]
+}

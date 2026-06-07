@@ -1,9 +1,0 @@
-{
-  "name": "demo",
-  "version": "0.1.0",
-  "did_vocabulary": ["declare_lab", "greet", "observe"],
-  "scopes": ["demo.session"],
-  "extra": {
-    "description": "Minimal demo pack used to complete a first Lab session."
-  }
-}

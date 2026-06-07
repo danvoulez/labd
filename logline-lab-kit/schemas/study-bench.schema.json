@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Study Bench",
+  "type": "object",
+  "required": ["id", "question", "hypothesis", "procedure", "expected", "receipt_scope"],
+  "properties": {
+    "id": { "type": "string" },
+    "question": { "type": "string" },
+    "hypothesis": { "type": "string" },
+    "inputs": {},
+    "procedure": { "type": "string" },
+    "expected": { "type": "string" },
+    "success_criteria": { "type": "string" },
+    "failure_criteria": { "type": "string" },
+    "receipt_scope": { "type": "string", "description": "The exact scope a receipt could close if the bench succeeds." },
+    "ghost_policy": { "type": "string" },
+    "allowed_tools": { "type": "array", "items": { "type": "string" } }
+  },
+  "description": "A bench is a convention that produces Acts; it is not a semantic primitive."
+}

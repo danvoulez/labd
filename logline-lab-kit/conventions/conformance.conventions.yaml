@@ -1,0 +1,7 @@
+# Conformance conventions (FINAL §16). Compatibility is shown, not claimed.
+version: 0
+expectations:
+  valid: "admits as exactly nine non-empty slots"
+  invalid: "must be rejected (missing slot, tenth slot, ...)"
+  ambiguous: "not strictly valid, but preservable as a candidate"
+export: "valid vectors export with content_hash so another Lab can compare."

@@ -1,8 +1,7 @@
 {
   "lab_id": "example.local.lab",
   "profile": "local-only",
-  "pack": "demo",
   "settings": {
-    "description": "Example Lab instance used by install/doctor.sh and the first-session example."
+    "description": "Example Lab instance. The basics: identity + profile, no pack. Packs are optional complements."
   }
 }
