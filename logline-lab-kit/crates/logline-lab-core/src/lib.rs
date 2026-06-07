@@ -20,7 +20,7 @@ pub use blocked::{evaluate as evaluate_blocked, BlockContext, BlockReason, Block
 pub use branch::{select_branch, Verdict};
 pub use evidence::{Evidence, EvidenceLog};
 pub use ghost::{Ghost, GhostLog};
-pub use manifest::{LabManifest, ManifestError, PackManifest, ProfileManifest};
+pub use manifest::{Grade, LabManifest, ManifestError, PackManifest, ProfileManifest};
 pub use receipt::{ReceiptCandidate, ReceiptError};
 
 #[cfg(test)]

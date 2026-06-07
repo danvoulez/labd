@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.4.0 — generic v0 cut: storage ontology + time (Etapas 0–6)
+
+Disciplined cut to a clean generic v0. Scope frozen in `recovery/RELEASE_SCOPE.md`.
+
+- **Storage is ontology.** Local files are capture/transport/cache, never
+  protocol-grade truth. New grade ladder (`candidate-only` / `dev-ephemeral` /
+  `publication`); admitted Acts require a declared Spine Profile. Honest grade +
+  warning surfaced in Start/Doctor. See `docs/STORAGE.md`.
+- **Supabase/Postgres out of the default path.** Excluded via `default-members`;
+  optional `labd --features supabase-profile`. Selecting an external spine without
+  it is refused as SOON. Santo André high-frequency storage is documented as a
+  LATER deployment, not generic.
+- **`labkit tick`** materializes time as Acts (clock_tick + due_disposition +
+  reschedule); no due Act skipped. **`labkit storage`** shows the onboarding matrix.
+- **No-pack end-to-end fixture** `release/examples/local-only-first-lab.sh` and
+  clean-build evidence in `release/checks/` (build/test/clippy -D/doctor/fixture
+  all exit 0; 99 tests).
+- Honest stubs to align the controlling-doc tree (experience/, benches/, install/,
+  release/, build-pack/package.manifest.yaml).
+- **Deferred to next cycle (review gate):** science rigor (Etapas 7–8:
+  SCIENCE_STANDARDS + science-core projections).
+
 ## v0.3.0 — headless surfaces (the final 30%)
 
 Close the Lab Kit as a protocol-grade experimental substrate, not a UI project.

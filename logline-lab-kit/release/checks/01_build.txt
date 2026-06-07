@@ -1,0 +1,56 @@
+# 2026-06-07T10:21:49Z — clean build
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.45
+   Compiling serde_core v1.0.228
+   Compiling version_check v0.9.5
+   Compiling zmij v1.0.21
+   Compiling generic-array v0.14.7
+   Compiling serde v1.0.228
+   Compiling serde_json v1.0.150
+   Compiling typenum v1.20.1
+   Compiling itoa v1.0.18
+   Compiling syn v2.0.117
+   Compiling memchr v2.8.1
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling thiserror v2.0.18
+   Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
+   Compiling cfg-if v1.0.4
+   Compiling sha2 v0.10.9
+   Compiling utf8parse v0.2.2
+   Compiling anstyle-parse v1.0.0
+   Compiling anstyle-query v1.1.5
+   Compiling colorchoice v1.0.5
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle v1.0.14
+   Compiling strsim v0.11.1
+   Compiling anstream v1.0.0
+   Compiling anyhow v1.0.102
+   Compiling heck v0.5.0
+   Compiling clap_lex v1.1.0
+   Compiling clap_builder v4.6.0
+   Compiling serde_derive v1.0.228
+   Compiling thiserror-impl v2.0.18
+   Compiling clap_derive v4.6.1
+   Compiling clap v4.6.1
+   Compiling logline-act v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-act)
+   Compiling logline-lab-recovery-scanner v0.1.0 (/home/user/labd/logline-lab-kit/recovery/scanner)
+   Compiling logline-lab-hooks v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-hooks)
+   Compiling logline-lab-local v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-local)
+   Compiling logline-lab-core v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-core)
+   Compiling logline-lab-spine v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-spine)
+   Compiling logline-lab-clock v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-clock)
+   Compiling logline-lab-projectors v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-projectors)
+   Compiling logline-lab-ruler v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-ruler)
+   Compiling logline-lab-conformance v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-conformance)
+   Compiling logline-lab-reports v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-reports)
+   Compiling logline-lab-dispatch v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-dispatch)
+   Compiling logline-lab-supabase v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-supabase)
+   Compiling logline-lab-labd v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-labd)
+   Compiling logline-lab-mcp-server v0.1.0 (/home/user/labd/logline-lab-kit/apps/mcp-server)
+   Compiling logline-lab-acceptance v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-acceptance)
+   Compiling logline-lab-cli v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.61s
+build exit: 0

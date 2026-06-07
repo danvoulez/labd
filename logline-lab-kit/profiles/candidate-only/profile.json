@@ -1,0 +1,7 @@
+{
+  "name": "candidate-only",
+  "spine": "candidate-only",
+  "settings": {
+    "description": "Capture candidates only. This Lab cannot admit protocol-grade Acts until a Spine Profile is configured. Use it to draft before choosing storage."
+  }
+}

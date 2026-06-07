@@ -1,7 +1,7 @@
 {
   "name": "local-only",
-  "spine": "memory",
+  "spine": "dev-ephemeral",
   "settings": {
-    "description": "Offline profile. The spine is an in-process store; the local outbox is the cache. Nothing leaves the machine."
+    "description": "Dev-ephemeral profile. Admitted Acts live in a local append-only Act-log. This is DEV-ONLY / non-publication-grade: configure an external Spine Profile to publish. The local file is a cache/transport, not protocol-grade truth."
   }
 }

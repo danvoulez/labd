@@ -1,5 +1,5 @@
 {
   "name": "personal-offline",
-  "spine": "memory",
-  "settings": { "description": "A personal offline Lab. No network, ever. The local outbox is the cache; nothing syncs out." }
+  "spine": "dev-ephemeral",
+  "settings": { "description": "A personal offline Lab. No network, ever. Dev-ephemeral grade; the local Act-log is the durable local record but is not publication-grade." }
 }

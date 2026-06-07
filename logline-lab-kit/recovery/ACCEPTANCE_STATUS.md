@@ -9,6 +9,18 @@ A test is green only with command output / inspected evidence.
 basics (no pack). The end-to-end A01–A52 mapping lives in
 `crates/logline-lab-acceptance` (51 tests; `a24_a25` and `a49_a50` are combined).
 
+### Generic v0 cut — storage ontology + time (Etapas 0–6)
+The v0 generic scope is frozen in `recovery/RELEASE_SCOPE.md`. Storage was
+corrected from "local file = storage" to a **grade ladder** (`candidate-only` /
+`dev-ephemeral` / `publication`); admitted Acts require a declared Spine Profile.
+Supabase/Postgres are **out of the default build** (`default-members` +
+`labd --features supabase-profile`). Added `labkit tick` (materializes time as
+Acts), `labkit storage` (onboarding matrix), and a no-pack end-to-end fixture.
+Clean-build evidence is captured in `release/checks/` (build/test/clippy `-D
+warnings`/doctor/fixture all exit 0; **99 tests**). Tests:
+`storage_grades_are_honest`, `external_spine_is_soon_in_default_build`,
+`tick_materializes_time_as_acts`, plus `release/examples/local-only-first-lab.sh`.
+
 ### Headless surface contracts (the final 30%)
 The nine experience surfaces are now headless-first contracts, not a UI:
 - Each surface returns a stable, versioned JSON read-model (`kind` tag) and has a

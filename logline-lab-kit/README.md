@@ -19,11 +19,30 @@ no pack required. Packs (`santo-andre`, `manhattan`, `course-starter`) are
 **additive complements** that never change core.
 
 ```sh
-labkit session \
-  --lab examples/manifests/lab.json \
-  --profile profiles/local-only/profile.json \
-  --act examples/acts/first.act.json
+# whole no-pack flow: open -> write -> admit -> conformance -> bench ->
+# schedule -> tick -> proof -> learn -> export
+bash release/examples/local-only-first-lab.sh
 ```
+
+## Storage is ontology
+
+A local file is capture/transport/cache — **never** the protocol-grade home of
+admitted Acts. Storage has a grade ladder; admitted Acts need a declared Spine
+Profile ([`docs/STORAGE.md`](docs/STORAGE.md)):
+
+| Grade | v0 |
+|---|---|
+| `candidate-only` (capture only) | available |
+| `dev-ephemeral` (local Act-log, dev-only) | available |
+| `publication` (postgres/neon/supabase/byo) | **SOON** |
+
+```sh
+labkit storage     # the onboarding matrix
+```
+
+Supabase/Postgres are **optional and out of the default build** — enable with
+`--features supabase-profile`. Santo André's high-frequency SQL+outbox+queue is a
+LATER deployment, not generic.
 
 ## The Act
 

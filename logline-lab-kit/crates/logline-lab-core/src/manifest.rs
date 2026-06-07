@@ -43,8 +43,51 @@ impl PackManifest {
     }
 }
 
-/// A profile: an infrastructure choice (local-only / postgres / supabase /
-/// filesystem-manual). A profile selects a spine adapter; it does not change core.
+/// The protocol grade of a Lab's storage, derived from its Spine Profile.
+///
+/// A local file/outbox is capture/transport/cache — never the protocol-grade home
+/// of admitted Acts (RELEASE_SCOPE §1). Admitted Acts are only publication-grade
+/// when a declared external Spine Profile is configured.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum Grade {
+    /// Capture candidates only; no protocol-grade admission.
+    CandidateOnly,
+    /// Local append-only Act-log spine; dev-only / unregistered / non-publication.
+    DevEphemeral,
+    /// A declared external Spine Profile; publication-grade admitted Acts.
+    Publication,
+}
+
+impl Grade {
+    pub fn is_publication(&self) -> bool {
+        matches!(self, Grade::Publication)
+    }
+    /// Honest label applied to runs/Acts admitted under this grade.
+    pub fn run_label(&self) -> &'static str {
+        match self {
+            Grade::CandidateOnly => "candidate-only (no admitted Acts)",
+            Grade::DevEphemeral => "dev-only / unregistered / non-publication-grade",
+            Grade::Publication => "publication-grade",
+        }
+    }
+    pub fn warning(&self) -> Option<&'static str> {
+        match self {
+            Grade::CandidateOnly => Some(
+                "candidate-only: this Lab captures candidates but cannot admit \
+                 protocol-grade Acts. Configure a Spine Profile to admit.",
+            ),
+            Grade::DevEphemeral => Some(
+                "dev-ephemeral: admitted Acts live in a local Act-log and are \
+                 NOT publication-grade. Configure an external Spine Profile to publish.",
+            ),
+            Grade::Publication => None,
+        }
+    }
+}
+
+/// A profile: an infrastructure choice (the Spine Profile). A profile selects a
+/// spine adapter; it does not change core.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProfileManifest {
     pub name: String,
@@ -65,6 +108,17 @@ impl ProfileManifest {
             return Err(ManifestError::MissingField("spine"));
         }
         Ok(m)
+    }
+
+    /// The protocol grade implied by this profile's spine kind.
+    pub fn grade(&self) -> Grade {
+        match self.spine.as_str() {
+            "candidate-only" => Grade::CandidateOnly,
+            "dev-ephemeral" | "memory" | "local" | "local-only" => Grade::DevEphemeral,
+            "postgres" | "neon" | "supabase" | "byo" | "bring-your-own" => Grade::Publication,
+            // Unknown spine kinds are treated conservatively as dev-ephemeral.
+            _ => Grade::DevEphemeral,
+        }
     }
 }
 

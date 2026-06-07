@@ -145,12 +145,17 @@ mod tests {
         assert!(LabManifest::load(r#"{"profile":"local-only"}"#).is_err());
     }
 
-    /// A08 — Profile loads.
+    /// A08 — Profile loads (and carries an honest storage grade).
     #[test]
     fn a08_profile_loads() {
+        use logline_lab_core::Grade;
         let p = ProfileManifest::load(LOCAL_PROFILE).unwrap();
-        assert_eq!(p.spine, "memory");
-        assert_eq!(basics_lab().doctor().spine_kind, "memory");
+        assert_eq!(p.spine, "dev-ephemeral");
+        assert_eq!(p.grade(), Grade::DevEphemeral);
+        let doctor = basics_lab().doctor();
+        assert_eq!(doctor.spine_kind, "memory"); // in-process backing store
+        assert!(!doctor.publication_grade); // dev-ephemeral is not publication-grade
+        assert!(doctor.storage_warning.is_some());
     }
 
     /// A09 — Pack loads without mutating core.
@@ -706,6 +711,75 @@ mod surface_contracts {
         assert_eq!(lab.render_surface("settings", now).unwrap(), serde_json::to_value(lab.settings()).unwrap());
         // Unknown surfaces are rejected, not faked.
         assert!(lab.render_surface("nope", now).is_none());
+    }
+
+    /// Storage ontology (Etapa 1): candidate-only cannot admit; dev-ephemeral
+    /// admits but is non-publication-grade; the Start surface surfaces the matrix.
+    #[test]
+    fn storage_grades_are_honest() {
+        use logline_lab_core::{Grade, LabManifest, ProfileManifest};
+        use logline_lab_labd::Lab;
+        use serde_json::json;
+
+        // candidate-only: admission is refused (no Spine Profile).
+        let m = LabManifest::load(r#"{"lab_id":"c.lab","profile":"candidate-only"}"#).unwrap();
+        let p = ProfileManifest::load(r#"{"name":"candidate-only","spine":"candidate-only"}"#).unwrap();
+        let mut lab = Lab::init(m, vec![], p).unwrap();
+        assert_eq!(lab.admission_grade(), Grade::CandidateOnly);
+        let act = act("lab", "declare_lab", json!({}), "candidate");
+        assert!(lab.emit(&act).is_err(), "candidate-only must refuse admission");
+
+        // dev-ephemeral: admits, but is not publication-grade and warns.
+        let m = LabManifest::load(r#"{"lab_id":"d.lab","profile":"dev-ephemeral"}"#).unwrap();
+        let p = ProfileManifest::load(r#"{"name":"dev-ephemeral","spine":"dev-ephemeral"}"#).unwrap();
+        let mut lab = Lab::init(m, vec![], p).unwrap();
+        assert_eq!(lab.admission_grade(), Grade::DevEphemeral);
+        assert!(lab.emit(&act).is_ok());
+        let start = lab.start();
+        assert!(!start.publication_grade);
+        assert!(start.storage_warning.is_some());
+        // The onboarding matrix is honest: external spines are SOON.
+        assert!(start.storage_matrix.iter().any(|o| o.id == "supabase" && o.status == "soon"));
+        assert!(start.storage_matrix.iter().any(|o| o.id == "dev-ephemeral" && o.status == "available"));
+    }
+
+    /// A publication-grade external spine is SOON in the default generic build:
+    /// selecting it without the optional `supabase-profile` feature is refused
+    /// with a clear message. (The enabled-feature path is tested in `labd`.)
+    #[test]
+    fn external_spine_is_soon_in_default_build() {
+        use logline_lab_core::{LabManifest, ProfileManifest};
+        use logline_lab_labd::Lab;
+        let m = LabManifest::load(r#"{"lab_id":"p.lab","profile":"supabase"}"#).unwrap();
+        let p = ProfileManifest::load(r#"{"name":"supabase","spine":"supabase"}"#).unwrap();
+        match Lab::init(m, vec![], p) {
+            Ok(_) => panic!("expected `supabase` to be SOON in the default build"),
+            Err(e) => assert!(e.to_string().contains("SOON"), "got: {e}"),
+        }
+    }
+
+    /// Tick materializes time as Acts: clock_tick + due_disposition + reschedule,
+    /// with no due Act skipped (A24/A25 via the surface).
+    #[test]
+    fn tick_materializes_time_as_acts() {
+        use logline_lab_core::{LabManifest, ProfileManifest};
+        use logline_lab_labd::Lab;
+        let m = LabManifest::load(r#"{"lab_id":"t.lab","profile":"dev-ephemeral"}"#).unwrap();
+        let p = ProfileManifest::load(r#"{"name":"dev-ephemeral","spine":"dev-ephemeral"}"#).unwrap();
+        let mut lab = Lab::init(m, vec![], p).unwrap();
+        lab.schedule(&act("lab", "check_link", serde_json::json!({}), "candidate"), "2026-06-06T00:00:00Z")
+            .unwrap();
+        lab.sync().unwrap();
+
+        let before = lab.spine().all().len();
+        let report = lab.tick("2026-06-06T12:00:00Z", "2026-06-07T00:00:00Z").unwrap();
+        lab.sync().unwrap();
+        assert!(report.materialized);
+        assert_eq!(report.due.len(), 1);
+        assert!(report.tick_act.is_some());
+        assert!(report.acts_emitted >= 2); // tick + 1 disposition (+ reschedule)
+        // Time was confronted: new Acts exist on the spine.
+        assert!(lab.spine().all().len() > before);
     }
 
     /// A Lab on disk resumes identically across runs: the same Acts, candidates,

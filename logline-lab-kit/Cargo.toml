@@ -20,6 +20,29 @@ members = [
   "recovery/scanner",
 ]
 
+# The generic v0 default path must NOT depend on Supabase/Postgres (RELEASE_SCOPE
+# §"SOON"). The Supabase adapter stays in the workspace (so it can be built/tested
+# with `cargo build --workspace` or `--features supabase-profile`), but it is
+# excluded from the default build set.
+default-members = [
+  "crates/logline-act",
+  "crates/logline-lab-core",
+  "crates/logline-lab-local",
+  "crates/logline-lab-spine",
+  "crates/logline-lab-projectors",
+  "crates/logline-lab-clock",
+  "crates/logline-lab-ruler",
+  "crates/logline-lab-hooks",
+  "crates/logline-lab-dispatch",
+  "crates/logline-lab-reports",
+  "crates/logline-lab-conformance",
+  "crates/logline-lab-cli",
+  "crates/logline-lab-labd",
+  "crates/logline-lab-acceptance",
+  "apps/mcp-server",
+  "recovery/scanner",
+]
+
 [workspace.package]
 edition = "2021"
 rust-version = "1.75"

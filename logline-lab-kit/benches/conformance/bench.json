@@ -1,0 +1,13 @@
+{
+  "id": "conformance",
+  "question": "Does this Lab agree with the reference vectors?",
+  "hypothesis": "Valid vectors admit, invalid are rejected, ambiguous are preserved as candidates.",
+  "inputs": {"vectors": "foundation/conformance"},
+  "procedure": "Run the offline conformance suite and export examples.",
+  "expected": "Report is green; exported examples reproduce their content hashes.",
+  "success_criteria": "All vectors pass; exported example hashes are reproducible.",
+  "failure_criteria": "Any vector disagrees, or an exported hash does not reproduce.",
+  "receipt_scope": "bench.conformance",
+  "ghost_policy": "If a vector is ambiguous to this implementation, open a ghost.",
+  "allowed_tools": []
+}
