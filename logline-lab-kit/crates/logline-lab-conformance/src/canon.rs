@@ -147,10 +147,9 @@ pub fn verify_receipt(receipt: &Value) -> VerifyOutcome {
     VerifyOutcome::from(errors)
 }
 
-/// Verify an Envelope wrapper. labd's `logline-act` exposes NO envelope/transport
-/// primitive (no `compute_envelope_hash`), so the envelope layer cannot be verified
-/// here. This is recorded as an explicit unsupported-capability failure rather than
-/// silently skipped — closing it is a tracked SDK-plan deliverable.
+/// Verify an Envelope wrapper: the inner content receipt, the transport metadata, and
+/// the `envelope_hash` itself (recomputed via labd's `logline_act::envelope_hash` over
+/// the raw `{content, transport}`, preserving any extra transport fields).
 pub fn verify_envelope(env: &Value) -> VerifyOutcome {
     let mut errors = Vec::new();
     let Some(obj) = env.as_object() else {
@@ -182,12 +181,10 @@ pub fn verify_envelope(env: &Value) -> VerifyOutcome {
         _ => errors.push("envelope_hash must be a 64-char lowercase hex sha256".into()),
     }
 
-    // The decisive gap: no primitive to recompute and confirm envelope_hash.
-    errors.push(
-        "envelope_hash verification UNSUPPORTED: logline-act provides no envelope \
-         canonicalization primitive (compute_envelope_hash) — see CONFORMANCE_PLAN divergence #2"
-            .into(),
-    );
+    // Recompute and confirm the boundary-crossing hash (receiver-side check).
+    if let Err(e) = logline_act::verify_envelope_value(env) {
+        errors.push(format!("envelope_hash verification failed: {e}"));
+    }
 
     VerifyOutcome::from(errors)
 }

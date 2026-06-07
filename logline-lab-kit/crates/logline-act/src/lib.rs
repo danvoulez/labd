@@ -9,10 +9,12 @@
 
 mod act;
 mod canonical;
+mod envelope;
 mod error;
 
 pub use act::{validate_object, Act, Candidate};
-pub use canonical::{canonical_json, content_hash, tuple_hash, SLOTS};
+pub use canonical::{canonical_json, content_hash, envelope_hash, tuple_hash, SLOTS};
+pub use envelope::{verify_envelope_value, Envelope, TransportMeta};
 pub use error::ActError;
 
 #[cfg(test)]

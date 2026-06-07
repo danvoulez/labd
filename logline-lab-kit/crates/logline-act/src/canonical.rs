@@ -90,6 +90,22 @@ pub fn tuple_hash(value: &Value) -> Result<String, ActError> {
     Ok(sha256_hex(&canonical_json(&Value::Object(tuple))?))
 }
 
+/// Hash over a transport envelope: `sha256(jcs(envelope minus envelope_hash))`,
+/// i.e. over `{content, transport}`. Operates on the raw value so any extra
+/// transport metadata is preserved in the hash (no typed round-trip loss).
+///
+/// This is the boundary-crossing primitive (LIP-0007): the sender computes it at
+/// every transport hop; the receiver recomputes and compares before accepting. The
+/// `envelope_hash` lives ONLY on the wrapper — never inside the receipt/content.
+pub fn envelope_hash(value: &Value) -> Result<String, ActError> {
+    let mut env = value.clone();
+    let Value::Object(obj) = &mut env else {
+        return Err(ActError::NotAnObject);
+    };
+    obj.remove("envelope_hash");
+    Ok(sha256_hex(&canonical_json(&env)?))
+}
+
 /// Hash over the whole value minus self-referential `id`/`hashes` fields.
 pub fn content_hash(value: &Value) -> Result<String, ActError> {
     let mut v = value.clone();

@@ -8,7 +8,7 @@
 ✓ VALID   aux-number-decimal.json
 ✓ VALID   aux-unicode.json
 ✓ VALID   dan-rested.json
-✗ VALID   envelope.json — expected VALID, labd rejected: envelope_hash verification UNSUPPORTED: logline-act provides no envelope canonicalization primitive (compute_envelope_hash) — see CONFORMANCE_PLAN divergence #2
+✓ VALID   envelope.json
 ✓ VALID   minimal-resolved.json
 ✓ VALID   with-aux-fields.json
 ✓ INVALID content-hash-mismatch.json
@@ -24,28 +24,21 @@
 ✓ INVALID tuple-hash-mismatch.json
 ✓ INVALID wrong-receipt-version.json
 
-20/21 conform · 1 divergence(s)
-RED baseline — divergences are expected pre-SDK-plan (JCS canonicalization, missing envelope primitive, receipt projection). See recovery/CONFORMANCE_PLAN.md.
+21/21 conform · 0 divergence(s)
+GREEN — labd reproduces the canon byte-for-byte.
 
 ================================================================
 # EXTERNAL CROSS-CHECK — foundation reference verifier (Node, zero-dep)
 # node v20.20.2 · verify-receipt.mjs --suite over the same vendored vectors
 ================================================================
-✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/wrong-receipt-version.json — rejected (1 error)
 
 21 passed, 0 failed
 
-# INTERPRETATION
-# - labd 20/21 vs reference 21/21. Sole difference: envelope.json.
-#   labd fails it ONLY because logline-act has no envelope primitive
-#   (compute_envelope_hash) — divergence #2. The reference can verify it.
-# - labd reproduces the canon byte-for-byte on ALL 20 receipt-layer vectors,
-#   INCLUDING aux-unicode / aux-number-decimal / aux-key-order.
-# - CAVEAT (not a clean bill): the current vectors do NOT exercise the JCS
-#   edge cases where labd's hand-rolled canonicalizer provably diverges:
-#     * object KEYS containing astral (>U+FFFF) code points — labd sorts by
-#       Unicode scalar (UTF-8 byte order); JCS sorts by UTF-16 code units.
-#     * numbers needing ES6 exponential form. serde vs ES6 Number.toString.
-#   So 20/20 receipts pass by happening to match, not by spec guarantee.
-#   The canon forbids relying on a 'close' hand-roll → P1 (real JCS via
-#   serde_jcs) remains REQUIRED, plus the envelope primitive.
+# STATUS: labd 21/21 == reference 21/21 on the receipt suite.
+# Envelope primitive (logline-act::{Envelope,TransportMeta,envelope_hash,verify_envelope_value})
+# closes divergence #2. envelope-hash-mismatch (invalid) is still correctly rejected.
+#
+# REMAINING (not a vector failure): the hand-rolled canonicalizer is still NOT JCS.
+# See release/checks/jcs-adversarial-probe.txt — 4/7 adversarial cases diverge
+# (astral key order, integer-float, exponent threshold, negative zero). P1 (real
+# JCS) remains mandatory before C3 can be a real, permanent gate.

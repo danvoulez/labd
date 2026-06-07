@@ -139,10 +139,22 @@ tiers are distinct and labeled; neither masks the other.
 ## 7. Handoff to the SDK plan
 
 After C3, the SDK adoptions become measurable, witnessed deltas:
-- **P1 JCS (`serde_jcs`)** → unicode/number receipt vectors flip green.
-- **Envelope primitive in `logline-act`** → envelope vectors flip green.
-- **Receipt projection (`Act` → `logline.receipt.v0`)** → receipt-shape vectors flip green;
-  resolves divergence #3.
+- **P1 JCS (`serde_jcs` or vetted equiv)** → adversarial probe (`jcs_adversarial_matches_canon`,
+  currently `#[ignore]` expected-red) flips green. Does NOT change the receipt vector score
+  (already 20/20) — it guarantees conformance on inputs the vectors don't cover.
+- **Envelope primitive in `logline-act`** → `envelope.json` flips green. **DONE.**
+- **Receipt projection (`Act` → `logline.receipt.v0`)** → resolves divergence #3 (not yet
+  exercised: the harness feeds canon receipts directly to the hash fns, bypassing `Act`).
 
 Each is "make N red vectors green," proven by both the Rust harness and the foundation's
 own Node verifier. Buy-don't-build and the Act/projection invariant hold throughout.
+
+### Progress (2026-06-07)
+- ✅ **Adversarial JCS probe** added (`src/bin/jcs_probe.rs` +
+  `release/checks/jcs-adversarial-probe.txt` + `#[ignore]` test). Proven: 4/7 cases diverge.
+- ✅ **Envelope primitive** in `logline-act` (`Envelope`, `TransportMeta`, `envelope_hash`,
+  `verify_envelope_value`). Harness now verifies envelopes for real → **labd 21/21 ==
+  reference 21/21**. Envelope is a transport wrapper only: `envelope_hash` never inside
+  content, transport never becomes Act semantics.
+- ⏳ **P1 JCS replacement** — next; the only thing between here and a real (never-red) C3 gate.
+- ⏳ **C3 gate** — wired ONLY after JCS is green. No known-red exceptions.
