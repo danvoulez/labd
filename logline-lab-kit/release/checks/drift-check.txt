@@ -1,4 +1,4 @@
-# 2026-06-07T13:27:00Z — canon drift check (pinned SHA; offline manifest + online upstream)
+# 2026-06-07T15:50:51Z — canon drift check (pinned SHA; offline manifest + online upstream)
 # drift check — pinned LogLine-Foundation/conformance@389a6b676af30bf5e344f9287ef51472b7f7a53f
 OK offline: 57 vendored files match the manifest
 OK online: 57 vendored files match LogLine-Foundation/conformance@389a6b676af30bf5e344f9287ef51472b7f7a53f

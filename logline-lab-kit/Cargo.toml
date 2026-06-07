@@ -13,6 +13,7 @@ members = [
   "crates/logline-lab-dispatch",
   "crates/logline-lab-reports",
   "crates/logline-lab-conformance",
+  "crates/logline-lab-session",
   "crates/logline-lab-cli",
   "crates/logline-lab-labd",
   "crates/logline-lab-acceptance",
@@ -36,6 +37,7 @@ default-members = [
   "crates/logline-lab-dispatch",
   "crates/logline-lab-reports",
   "crates/logline-lab-conformance",
+  "crates/logline-lab-session",
   "crates/logline-lab-cli",
   "crates/logline-lab-labd",
   "crates/logline-lab-acceptance",
@@ -75,6 +77,7 @@ logline-lab-hooks = { path = "crates/logline-lab-hooks" }
 logline-lab-dispatch = { path = "crates/logline-lab-dispatch" }
 logline-lab-reports = { path = "crates/logline-lab-reports" }
 logline-lab-conformance = { path = "crates/logline-lab-conformance" }
+logline-lab-session = { path = "crates/logline-lab-session" }
 logline-lab-labd = { path = "crates/logline-lab-labd" }
 
 [workspace.lints.rust]

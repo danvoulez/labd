@@ -17,7 +17,7 @@ echo "==> protocol conformance (offline)"
 ( cd "$ROOT" && cargo run -q -p logline-lab-cli --bin labkit -- conformance >/dev/null && echo "conformance: green" )
 
 echo "==> first Lab session (basics: local-only profile, no pack)"
-( cd "$ROOT" && cargo run -q -p logline-lab-cli --bin labkit -- session \
+( cd "$ROOT" && cargo run -q -p logline-lab-cli --bin labkit -- emit \
     --lab examples/manifests/lab.json \
     --profile profiles/local-only/profile.json \
     --act examples/acts/first.act.json )

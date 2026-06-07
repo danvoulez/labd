@@ -43,7 +43,7 @@ run write --lab "$ROOT/examples/manifests/lab.json" --profile "$ROOT/profiles/ca
 jassert "$TMP/co.json" "d['outcome']=='candidate'"  # even a valid Act is only captured, not admitted
 
 echo "## 4. admit a valid Act (promotion is strict; dev-ephemeral admits)"
-run session "${LAB[@]}" --act "$ROOT/examples/acts/first.act.json" | tail -1
+run emit "${LAB[@]}" --act "$ROOT/examples/acts/first.act.json" | tail -1
 
 echo "## 5. offline conformance"
 run conformance >/dev/null && echo "  conformance: green"

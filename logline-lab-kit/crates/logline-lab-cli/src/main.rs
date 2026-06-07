@@ -12,7 +12,7 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use logline_act::Act;
 use logline_lab_core::{bench::StudyBench, LabManifest, PackManifest, ProfileManifest};
-use logline_lab_labd::Lab;
+use logline_lab_labd::{Lab, ResidentSession};
 
 #[derive(Parser)]
 #[command(name = "labkit", version, about = "LogLine Lab Kit — installable Lab formation kit")]
@@ -59,11 +59,16 @@ enum Command {
         lab: LabArgs,
     },
     /// Emit Act file(s) into a Lab, then sync and report.
-    Session {
+    Emit {
         #[command(flatten)]
         lab: LabArgs,
         #[arg(long = "act")]
         acts: Vec<PathBuf>,
+    },
+    /// Resident session (provider-free): presence over the Act graph.
+    Session {
+        #[command(subcommand)]
+        cmd: SessionCmd,
     },
     /// Surface: Start — declare/open a Lab and show first next actions.
     Start {
@@ -159,6 +164,66 @@ enum Command {
     Scan { paths: Vec<PathBuf> },
 }
 
+/// Resident session subcommands. All provider-free (step C). A provider attaches behind
+/// the `ProviderAdapter` trait in a later step; it is never required.
+#[derive(Subcommand)]
+enum SessionCmd {
+    /// Open (or resume) a resident session and show Start. Use `--store` for durability/resume.
+    Start {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+    },
+    /// Read a Lab read-surface (start/today/timeline/schedule/learn/settings/storage).
+    View {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+        #[arg(long)]
+        surface: String,
+    },
+    /// Capture material as a candidate (NOT admitted): `--text` or `--json`.
+    Write {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[arg(long)]
+        text: Option<String>,
+        #[arg(long)]
+        json: Option<PathBuf>,
+    },
+    /// Human approval: mint an authorization candidate; the Lab admits the target Act.
+    Approve {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+        /// Strict Act JSON file to promote.
+        #[arg(long)]
+        json: PathBuf,
+    },
+    /// Tick the Lab (confront time).
+    Tick {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+        #[arg(long, default_value = "2999-01-01T00:00:00Z")]
+        next_due: String,
+    },
+    /// Show the session transcript (projection over Acts; rebuilt from the Lab).
+    Transcript {
+        #[command(flatten)]
+        lab: LabArgs,
+    },
+    /// Close the session (state lives in the Lab; nothing else to persist).
+    Close {
+        #[command(flatten)]
+        lab: LabArgs,
+    },
+}
+
 fn read(path: &PathBuf) -> Result<String> {
     std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))
 }
@@ -180,6 +245,56 @@ fn load(args: &LabArgs) -> Result<Lab> {
 
 fn print_json<T: serde::Serialize>(v: &T) -> Result<()> {
     println!("{}", serde_json::to_string_pretty(v)?);
+    Ok(())
+}
+
+fn resident(lab: &LabArgs) -> Result<ResidentSession> {
+    // Provider-free resident session over a (preferably `--store`-backed) Lab.
+    Ok(ResidentSession::open(load(lab)?, "resident", "operator"))
+}
+
+fn run_session(cmd: SessionCmd) -> Result<()> {
+    let le = |e: logline_lab_labd::LabError| anyhow::anyhow!("{e}");
+    match cmd {
+        SessionCmd::Start { lab, now } => {
+            let rs = resident(&lab)?;
+            print_json(&rs.view("start", &now.now).map_err(le)?)?;
+        }
+        SessionCmd::View { lab, now, surface } => {
+            let rs = resident(&lab)?;
+            print_json(&rs.view(&surface, &now.now).map_err(le)?)?;
+        }
+        SessionCmd::Write { lab, text, json } => {
+            let mut rs = resident(&lab)?;
+            match (text, json) {
+                (Some(t), _) => print_json(&rs.write_text(&t).map_err(le)?)?,
+                (None, Some(p)) => {
+                    let v: serde_json::Value = serde_json::from_str(&read(&p)?)?;
+                    rs.write_candidate(v.clone()).map_err(le)?;
+                    print_json(&v)?;
+                }
+                (None, None) => anyhow::bail!("session write needs --text or --json"),
+            }
+        }
+        SessionCmd::Approve { lab, now, json } => {
+            let mut rs = resident(&lab)?;
+            let act = Act::from_json_strict(&read(&json)?).map_err(|e| anyhow::anyhow!("{e}"))?;
+            print_json(&rs.approve(&act, &now.now).map_err(le)?)?;
+        }
+        SessionCmd::Tick { lab, now, next_due } => {
+            let mut rs = resident(&lab)?;
+            print_json(&rs.tick(&now.now, &next_due).map_err(le)?)?;
+        }
+        SessionCmd::Transcript { lab } => {
+            let rs = resident(&lab)?;
+            print_json(&rs.transcript())?;
+        }
+        SessionCmd::Close { lab } => {
+            let rs = resident(&lab)?;
+            let _ = rs.close();
+            println!("session closed");
+        }
+    }
     Ok(())
 }
 
@@ -211,7 +326,7 @@ fn main() -> Result<()> {
             }
         }
         Command::Doctor { lab } => print_json(&load(&lab)?.doctor())?,
-        Command::Session { lab, acts } => {
+        Command::Emit { lab, acts } => {
             let mut lab = load(&lab)?;
             for act_path in &acts {
                 let act = Act::from_json_strict(&read(act_path)?)
@@ -223,6 +338,7 @@ fn main() -> Result<()> {
             println!("sync: ingested={} already_present={}", s.ingested, s.already_present);
             print_json(&lab.report("1970-01-01T00:00:00Z"))?;
         }
+        Command::Session { cmd } => run_session(cmd)?,
         Command::Start { lab } => print_json(&load(&lab)?.start())?,
         Command::Today { lab, now } => print_json(&load(&lab)?.today(&now.now))?,
         Command::Timeline { lab, now } => print_json(&load(&lab)?.timeline(&now.now))?,

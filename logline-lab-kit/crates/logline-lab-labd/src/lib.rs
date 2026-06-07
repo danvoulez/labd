@@ -12,11 +12,13 @@
 #![forbid(unsafe_code)]
 
 mod experience;
+mod resident;
 
 pub use experience::{
     storage_matrix, DueDisposition, ProofView, ScheduleView, SettingsView, SpineOption, StartView,
     TickReport, TimelineView, TodayView, WorkbenchRun, WriteOutcome,
 };
+pub use resident::{ApproveOutcome, ResidentSession};
 
 use std::path::{Path, PathBuf};
 
@@ -51,6 +53,10 @@ pub enum LabError {
     SpineUnavailable(String),
     #[error("candidate-only Lab: cannot admit Acts without a configured Spine Profile")]
     CandidateOnly,
+    #[error(transparent)]
+    Act(#[from] logline_act::ActError),
+    #[error("unsupported: {0}")]
+    Unsupported(String),
 }
 
 /// Doctor report on a Lab's wiring.
@@ -303,6 +309,13 @@ impl Lab {
     pub(crate) fn push_candidate(&mut self, value: Value) -> Result<(), LabError> {
         self.candidates.push(value);
         self.persist_candidates()
+    }
+
+    /// Capture a value as a candidate WITHOUT admitting it (candidate-generous). The Lab
+    /// admits only via promotion discipline (`emit`/`write`), never by capture — this is
+    /// how a session captures human/model drafts without performing admission.
+    pub fn capture_candidate(&mut self, value: Value) -> Result<(), LabError> {
+        self.push_candidate(value)
     }
 
     fn persist_evidence(&self) -> Result<(), LabError> {

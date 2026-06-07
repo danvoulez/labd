@@ -1,4 +1,4 @@
-# 2026-06-07T13:26:21Z — clean build (default generic members)
+# 2026-06-07T15:49:47Z — clean build (default generic members)
    Compiling proc-macro2 v1.0.106
    Compiling quote v1.0.45
    Compiling unicode-ident v1.0.24
@@ -7,31 +7,31 @@
    Compiling version_check v0.9.5
    Compiling serde_json v1.0.150
    Compiling serde v1.0.228
-   Compiling memchr v2.8.1
-   Compiling generic-array v0.14.7
    Compiling itoa v1.0.18
+   Compiling generic-array v0.14.7
    Compiling typenum v1.20.1
+   Compiling memchr v2.8.1
    Compiling libc v0.2.186
    Compiling thiserror v2.0.18
    Compiling ryu-js v1.0.2
    Compiling cfg-if v1.0.4
    Compiling utf8parse v0.2.2
-   Compiling anstyle-parse v1.0.0
-   Compiling syn v2.0.117
-   Compiling anstyle v1.0.14
    Compiling colorchoice v1.0.5
+   Compiling anstyle-parse v1.0.0
+   Compiling anstyle v1.0.14
    Compiling is_terminal_polyfill v1.70.2
    Compiling anstyle-query v1.1.5
    Compiling anyhow v1.0.102
-   Compiling heck v0.5.0
+   Compiling strsim v0.11.1
    Compiling anstream v1.0.0
    Compiling clap_lex v1.1.0
-   Compiling strsim v0.11.1
+   Compiling heck v0.5.0
    Compiling clap_builder v4.6.0
+   Compiling syn v2.0.117
    Compiling crypto-common v0.1.7
    Compiling block-buffer v0.10.4
-   Compiling cpufeatures v0.2.17
    Compiling digest v0.10.7
+   Compiling cpufeatures v0.2.17
    Compiling sha2 v0.10.9
    Compiling serde_derive v1.0.228
    Compiling thiserror-impl v2.0.18
@@ -41,10 +41,11 @@
    Compiling logline-lab-recovery-scanner v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/recovery/scanner)
    Compiling logline-lab-hooks v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-hooks)
    Compiling logline-act v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-act)
-   Compiling logline-lab-local v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-local)
    Compiling logline-lab-core v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-core)
+   Compiling logline-lab-local v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-local)
    Compiling logline-lab-conformance v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-conformance)
    Compiling logline-lab-clock v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-clock)
+   Compiling logline-lab-session v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-session)
    Compiling logline-lab-spine v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-spine)
    Compiling logline-lab-projectors v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-projectors)
    Compiling logline-lab-ruler v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-ruler)
@@ -54,4 +55,4 @@
    Compiling logline-lab-mcp-server v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/apps/mcp-server)
    Compiling logline-lab-acceptance v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-acceptance)
    Compiling logline-lab-cli v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-cli)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.58s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 21.89s

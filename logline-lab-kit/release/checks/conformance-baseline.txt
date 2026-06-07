@@ -1,4 +1,4 @@
-# 2026-06-07T13:26:53Z — canon conformance — Rust harness (REQUIRED: 21/21 conform · 0 divergence(s))
+# 2026-06-07T15:50:41Z — canon conformance — Rust harness (REQUIRED: 21/21 conform · 0 divergence(s))
 # LogLine canon conformance — BASELINE (reporter, not a gate)
 # vectors: /Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-conformance/../../foundation/conformance/canon/vectors/receipt
 # pinned:  LogLine-Foundation/conformance@389a6b676af30bf5e344f9287ef51472b7f7a53f
@@ -28,7 +28,7 @@
 21/21 conform · 0 divergence(s)
 GREEN — labd reproduces the canon byte-for-byte.
 
-# 2026-06-07T13:26:59Z — canon conformance — Node reference verifier (REQUIRED: 21 passed, 0 failed)
+# 2026-06-07T15:50:50Z — canon conformance — Node reference verifier (REQUIRED: 21 passed, 0 failed)
 ✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-array-order.json
 ✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-key-order.json
 ✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-nested.json

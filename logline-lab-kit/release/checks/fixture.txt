@@ -1,4 +1,4 @@
-# 2026-06-07T13:27:32Z — no-pack first-lab fixture (asserts JSON fields)
+# 2026-06-07T15:51:25Z — no-pack first-lab fixture (asserts JSON fields)
 ## 0. storage matrix — external spines are SOON; local is available
   ok: any(o['id']=='supabase' and o['status']=='soon' for o in d)
   ok: any(o['id']=='dev-ephemeral' and o['status']=='available' for o in d)
@@ -35,3 +35,33 @@
   ok: local actlog.jsonl is the dev-ephemeral record
   ok: no supabase/manhattan/santo in local store
 ## OK: no-pack dev-ephemeral first Lab completed end-to-end (asserted).
+# 2026-06-07T15:51:33Z — provider-free resident session fixture (asserts JSON + resume)
+## 1. session start — no provider attached
+  ok: d['kind']=='logline.view.start.v0'
+  ok: d['publication_grade']==False
+## 2. session view — the same read surfaces a human/LLM would see
+  ok: isinstance(d, (dict, list))
+  ok: isinstance(d, (dict, list))
+  ok: isinstance(d, (dict, list))
+  ok: isinstance(d, (dict, list))
+  ok: isinstance(d, (dict, list))
+  ok: isinstance(d, (dict, list))
+## 3. session write — capture human text as a candidate (NOT admitted)
+  ok: d['did']=='note' and d['status']=='candidate'
+## 3b. transcript shows a candidate, but NOTHING admitted yet
+  ok: d['kind']=='logline.view.session_transcript.v0'
+  ok: any(e['event']=='candidate_drafted' for e in d['events'])
+  ok: not any(e['event']=='act_admitted' for e in d['events'])
+## 4. session approve — authorization candidate + the LAB admits the target
+  ok: d['authorization']['did']=='authorize_promotion'
+  ok: d['authorization']['status']=='candidate'
+  ok: d['admitted_content_hash'] is not None
+## 5. session tick — confront time
+  ok: isinstance(d, dict)
+## 6. RESUME after restart — a fresh process reopens the SAME store
+  ok: no separate session-truth store
+  ok: any(e['event']=='act_admitted' for e in d['events'])
+  ok: any(e['event']=='candidate_drafted' for e in d['events'])
+## 7. session close
+session closed
+PASS — provider-free resident session: presence over Acts, resumed from the Lab.

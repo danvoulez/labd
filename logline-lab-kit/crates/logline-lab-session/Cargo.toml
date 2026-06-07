@@ -1,0 +1,18 @@
+[package]
+name = "logline-lab-session"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+# Provider-NEUTRAL session substrate. Depends only on the Act core: it can produce
+# candidates and project a transcript, but it has NO admission path, NO spine, and NO
+# provider/runtime deps. Those (tokio, genai, rmcp, …) enter only behind the
+# ProviderAdapter trait / MCP boundary in later steps.
+[dependencies]
+logline-act.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

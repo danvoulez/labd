@@ -48,4 +48,7 @@ bash install/doctor.sh 2>&1 | tee -a "$OUT/doctor.txt"
 stamp "no-pack first-lab fixture (asserts JSON fields)" | tee "$OUT/fixture.txt"
 STORE=/tmp/llk-checks-lab bash release/examples/local-only-first-lab.sh 2>&1 | tee -a "$OUT/fixture.txt"
 
+stamp "provider-free resident session fixture (asserts JSON + resume)" | tee -a "$OUT/fixture.txt"
+STORE=/tmp/llk-checks-session bash release/examples/no-provider-session.sh 2>&1 | tee -a "$OUT/fixture.txt"
+
 echo "C3 GATE PASSED — all required conformance + build checks succeeded -> $OUT"
