@@ -919,9 +919,10 @@ mod hardening {
             "verify-receipt.mjs --suite",
             "check-drift.sh",
             "jcs_probe",
-            // doctor + no-pack fixture
+            // doctor + no-pack fixture + provider-free resident session fixture
             "install/doctor.sh",
             "local-only-first-lab.sh",
+            "no-provider-session.sh",
         ] {
             assert!(script.contains(cmd), "release gate missing step: {cmd}");
         }

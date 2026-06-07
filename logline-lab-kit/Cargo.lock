@@ -286,6 +286,7 @@ dependencies = [
  "logline-lab-projectors",
  "logline-lab-reports",
  "logline-lab-ruler",
+ "logline-lab-session",
  "logline-lab-spine",
  "logline-lab-supabase",
  "serde",

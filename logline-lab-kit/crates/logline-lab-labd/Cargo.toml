@@ -15,6 +15,7 @@ logline-lab-reports.workspace = true
 logline-lab-clock.workspace = true
 logline-lab-ruler.workspace = true
 logline-lab-conformance.workspace = true
+logline-lab-session.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

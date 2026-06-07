@@ -219,20 +219,25 @@ explicit local-dev mode otherwise.
 
 ## 9. Resident session — CLI (Mode 1)
 
+Implemented provider-free (step C). All operate on a `--store`-backed Lab so state resumes
+across runs from the Lab's Acts:
+
 ```
-labkit session start       # open a resident session over the Lab
-labkit session attach       # attach to a running session
-labkit session transcript   # show transcript (projection/cache)
-labkit session suggest      # ask the provider for a suggestion (draft only)
-labkit session draft        # turn input into a candidate Act
-labkit session approve      # authorize promotion (does NOT admit; the Lab admits)
+labkit session start        # open/resume a resident session; show Start
+labkit session view --surface today   # read a Lab read-surface (start/today/timeline/
+                            #   schedule/learn/settings/storage)
+labkit session write --text "…"       # capture human text as a candidate (NOT admitted)
+labkit session write --json file.json # capture a structured candidate (NOT admitted)
+labkit session approve --json act.json # mint authorization candidate; the LAB admits target
+labkit session tick                    # confront time
+labkit session transcript              # projection over the Lab's Acts (rebuilt, not stored)
 labkit session close
 ```
 
-First implementation: human terminal input, the provider adapter interface, **Ollama (or a
-local provider) as the simplest default**, optional Anthropic/OpenAI via Settings. The
-provider interface is generic; Ollama is preferred first because it avoids hosted-provider
-assumptions.
+(The old batch-admit command was renamed `labkit session` → **`labkit emit`** to free the
+`session` namespace.) Provider-driven commands (`suggest`/`draft`/`attach` a provider) arrive
+in step D behind the `ProviderAdapter` trait — **Ollama/local first** because it avoids
+hosted-provider assumptions; never required.
 
 ---
 
@@ -334,14 +339,16 @@ planner, RAG identity, or orchestration model as the Lab's runtime.
 grants; no-silent-admission; human-approval boundaries; provider-agnostic model
 participation; worker evidence; resumability from Acts; shared surfaces.
 
-### In scope now
-1. `docs/SESSIONS_AND_AGENT_RUNTIME.md` (this doc)
-2. provider-neutral session types (B)
-3. no-provider resident session loop (C)
-4. settings provider registry shape (E)
-5. provider adapter trait (B/D)
-6. local/Ollama provider spike — by behavior (D)
-7. transcript/session projections over existing surfaces (G, contract)
+### Progress
+- ✅ **A** — this design contract.
+- ✅ **B** — `logline-lab-session` crate (provider-neutral types + `ProviderAdapter` trait).
+- ✅ **Provider spike** — genai 0.6.5 accepted by behavior (live round-trip pending; `recovery/PROVIDER_CLIENT_SPIKE.md`).
+- ✅ **C** — provider-free resident session: `ResidentSession` in `logline-lab-labd`, `labkit session start|view|write|approve|tick|transcript|close`, no-provider fixture (`release/examples/no-provider-session.sh`) proving capture/approve/admit/tick/transcript + **resume-after-restart from Acts** (no session-truth store). Wired into the gate.
+- ⏳ **D** — attach genai behind the trait (gate on a live Ollama round-trip).
+
+### In scope (remaining)
+Settings provider registry (E) · resident provider MVP (F) · event stream contract (G) ·
+MCP remote (H) · worker-autonomy security prerequisites (I).
 
 ### Not yet
 Full daemon · remote tunnel (Cloudflare/Tailscale/ngrok) · Shared UI frontend · MCP remote

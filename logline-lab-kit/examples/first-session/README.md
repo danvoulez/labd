@@ -3,7 +3,7 @@
 A minimal first Lab session using the demo pack and local-only profile:
 
 ```sh
-labkit session \
+labkit emit \
   --lab examples/manifests/lab.json \
   --pack packs/demo/pack.json \
   --profile profiles/local-only/profile.json \
