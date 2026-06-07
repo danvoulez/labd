@@ -26,9 +26,16 @@ Isolated `/tmp` spike, `Client::exec_chat("llama3.2", ChatRequest, None)`, no AP
 | TLS backend | ✅ **rustls** (pure-Rust; no OpenSSL/C) |
 | License | ✅ MIT OR Apache-2.0 |
 
-**Not yet verified:** a **live round-trip** — Ollama is not installed on this machine, so the
-call failed at connection (the *correct* failure, proving local targeting). Final acceptance
-at step D requires a real round-trip against a running Ollama.
+**Live round-trip — VERIFIED (2026-06-07):** genai completed a real round-trip against an
+OpenAI-compatible endpoint provided by the operator (`https://mistral.minilab.work/v1`,
+`Bearer EMPTY`) via a `ServiceTargetResolver` (custom `Endpoint` + `AuthData::from_single`
++ `AdapterKind::OpenAI`). genai connected, authenticated, sent the request, and returned a
+response — proving live model behavior through the Rust client, not just connection
+targeting. (The code model echoed tool-call-shaped JSON rather than the literal prompt; a
+curl baseline against the same endpoint returned `ok`. That is model/prompt behavior, not a
+client issue.) **Still not run:** a round-trip against a local *Ollama* specifically (Ollama
+not installed here) — genai uses the same client path, and the earlier offline spike already
+proved it targets `localhost:11434` with no hosted assumptions.
 
 **Concern to weigh:** footprint — genai pulls **~269 transitive crates** (multi-provider
 HTTP + TLS + async). Consistent with the already-accepted `tokio`/`reqwest`/`rustls` stack,
