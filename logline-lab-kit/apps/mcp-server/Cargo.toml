@@ -8,6 +8,7 @@ license.workspace = true
 [dependencies]
 logline-act.workspace = true
 logline-lab-core.workspace = true
+logline-lab-labd.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 

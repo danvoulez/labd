@@ -1,9 +1,15 @@
-//! The nine experience surfaces (FINAL §11) as library functions.
+//! The nine experience surfaces (FINAL §11) as **headless read-model contracts**.
 //!
-//! "The surface is flexible. The experience grammar is not." These methods are
-//! the grammar; CLI/MCP/web/TUI are surfaces that wrap them. They read
-//! projections and act through the same discipline as everything else — settings
-//! never bypass proof discipline (A40).
+//! "The surface is flexible. The experience grammar is not." Each surface is a
+//! library function returning a stable, versioned JSON struct (a `kind` tag marks
+//! the contract). The `labkit` CLI and any MCP/GUI/TUI client consume the *same*
+//! structs, so a human and an LLM open the same Lab and see the same reality:
+//! the same Acts, candidates, evidence, ghosts, receipts, schedule, blocked/
+//! overdue/due obligations, experiments, proof state, learning, and uncertainty.
+//!
+//! Division of labor (FINAL §0–§17): humans authorize and carry consequences;
+//! LLMs translate/route/explain/criticize but never decide; automation handles
+//! repetition, scheduling, validation, observation, and continuity.
 
 use logline_act::Act;
 use logline_lab_core::{
@@ -20,17 +26,22 @@ use crate::{Lab, LabError};
 /// Start — declare or open a Lab and confirm it can exist and remember.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct StartView {
+    pub kind: String,
     pub lab_id: String,
     pub profile: String,
     pub packs: Vec<String>,
     pub spine_kind: String,
     pub conformance_green: bool,
     pub total_acts: usize,
+    /// First valid next actions an operator (or LLM) can take.
+    pub next_actions: Vec<String>,
 }
 
 /// Today — the current operational study state.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TodayView {
+    pub kind: String,
+    pub now: String,
     pub due: Vec<String>,
     pub overdue: Vec<String>,
     pub blocked: Vec<String>,
@@ -44,9 +55,22 @@ pub struct TodayView {
 /// Timeline — past / present / future Acts.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TimelineView {
+    pub kind: String,
+    pub now: String,
     pub past: Vec<String>,
     pub present: Vec<String>,
     pub future: Vec<String>,
+}
+
+/// Schedule — scheduled/due/overdue/blocked obligations and ruler decisions.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ScheduleView {
+    pub kind: String,
+    pub now: String,
+    pub scheduled: Vec<String>,
+    pub due: Vec<String>,
+    pub overdue: Vec<String>,
+    pub blocked: Vec<String>,
 }
 
 /// Write — outcome of capturing a candidate (ugly capture allowed).
@@ -62,6 +86,7 @@ pub enum WriteOutcome {
 /// Workbench — the result of running a study bench.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WorkbenchRun {
+    pub kind: String,
     pub bench_id: String,
     pub acts_emitted: usize,
     pub outcome: BenchOutcome,
@@ -70,6 +95,7 @@ pub struct WorkbenchRun {
 /// Proof — claim / evidence / receipt / ghost kept strictly separate.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ProofView {
+    pub kind: String,
     pub scope: String,
     pub claim_act_hash: String,
     pub evidence_count: usize,
@@ -83,6 +109,7 @@ pub struct ProofView {
 /// bypass Act discipline, proof discipline, or gate policy.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct SettingsView {
+    pub kind: String,
     pub profile: String,
     pub spine: String,
     pub packs: Vec<String>,
@@ -99,13 +126,22 @@ fn is_open(act: &Act) -> bool {
 impl Lab {
     /// Surface 1 — Start.
     pub fn start(&self) -> StartView {
+        let total_acts = self.spine().all().len();
+        let mut next_actions = Vec::new();
+        if total_acts == 0 {
+            next_actions.push("write the first candidate Act (labkit write)".to_string());
+        }
+        next_actions.push("run a study bench (labkit workbench)".to_string());
+        next_actions.push("check what is due today (labkit today)".to_string());
         StartView {
+            kind: "logline.view.start.v0".to_string(),
             lab_id: self.lab_id().to_string(),
             profile: self.profile().name.clone(),
             packs: self.packs().iter().map(|p| p.name.clone()).collect(),
             spine_kind: self.spine().kind().to_string(),
             conformance_green: self.conformance().is_green(),
-            total_acts: self.spine().all().len(),
+            total_acts,
+            next_actions,
         }
     }
 
@@ -141,6 +177,8 @@ impl Lab {
         let cap = capacity(self.spine(), now, due.len());
 
         TodayView {
+            kind: "logline.view.today.v0".to_string(),
+            now: now.to_string(),
             due,
             overdue,
             blocked,
@@ -173,7 +211,57 @@ impl Lab {
                 std::cmp::Ordering::Greater => future.push(marker),
             }
         }
-        TimelineView { past, present, future }
+        TimelineView {
+            kind: "logline.view.timeline.v0".to_string(),
+            now: now.to_string(),
+            past,
+            present,
+            future,
+        }
+    }
+
+    /// Surface 5 (read model) — Schedule.
+    pub fn schedule_view(&self, now: &str) -> ScheduleView {
+        let mut scheduled = Vec::new();
+        for s in self.spine().all() {
+            let is_scheduled = s.act.status.as_str() == Some("scheduled")
+                || s.act
+                    .this
+                    .get("due_at")
+                    .and_then(|v| v.as_str())
+                    .map(|d| d > now)
+                    .unwrap_or(false);
+            if is_scheduled && is_open(&s.act) {
+                scheduled.push(s.content_hash.clone());
+            }
+        }
+        let due: Vec<String> = due_work(self.spine(), now)
+            .iter()
+            .map(|a| a.content_hash().unwrap_or_default())
+            .collect();
+        let overdue: Vec<String> = overdue_work(self.spine(), now)
+            .iter()
+            .map(|a| a.content_hash().unwrap_or_default())
+            .collect();
+        let blocked: Vec<String> = self
+            .spine()
+            .all()
+            .iter()
+            .filter(|s| {
+                let scope = s.act.did.as_str().unwrap_or("");
+                let ctx = BlockContext { evidence: self.evidence(), permitted: true };
+                logline_lab_core::evaluate_blocked(&s.act, scope, &ctx).is_some()
+            })
+            .map(|s| s.content_hash.clone())
+            .collect();
+        ScheduleView {
+            kind: "logline.view.schedule.v0".to_string(),
+            now: now.to_string(),
+            scheduled,
+            due,
+            overdue,
+            blocked,
+        }
     }
 
     /// Surface 4 — Write (ugly capture allowed, promotion strict).
@@ -188,13 +276,13 @@ impl Lab {
             Err(_) => {
                 let candidate = Act::candidate_from_value(value);
                 let missing = candidate.missing_slots().iter().map(|s| s.to_string()).collect();
-                self.candidates.push(value.clone());
+                self.push_candidate(value.clone())?;
                 Ok(WriteOutcome::Candidate { missing })
             }
         }
     }
 
-    /// Surface 5 — Schedule: place an Act as a future obligation at `due_at`.
+    /// Surface 5 (action) — Schedule: place an Act as a future obligation.
     pub fn schedule(&mut self, act: &Act, due_at: &str) -> Result<Act, LabError> {
         let mut this = act.this.clone();
         if let Value::Object(map) = &mut this {
@@ -217,8 +305,8 @@ impl Lab {
         Ok(scheduled)
     }
 
-    /// Surface 6 — Workbench: run a study bench. Emits its declared Acts, then
-    /// turns the observation into evidence or a ghost.
+    /// Surface 6 — Workbench: run a study bench, turning observation into
+    /// evidence or a ghost.
     pub fn workbench(
         &mut self,
         bench: &StudyBench,
@@ -237,6 +325,7 @@ impl Lab {
             BenchOutcome::Ghost(g) => self.record_ghost(g.clone()),
         }
         Ok(WorkbenchRun {
+            kind: "logline.view.workbench.v0".to_string(),
             bench_id: bench.id.clone(),
             acts_emitted: acts.len(),
             outcome,
@@ -255,6 +344,7 @@ impl Lab {
             .map(|g| g.id.clone())
             .collect();
         ProofView {
+            kind: "logline.view.proof.v0".to_string(),
             scope: scope.to_string(),
             claim_act_hash: act.content_hash().unwrap_or_default(),
             evidence_count,
@@ -272,11 +362,32 @@ impl Lab {
     /// Surface 9 — Settings. Read-only view; authority is always locked.
     pub fn settings(&self) -> SettingsView {
         SettingsView {
+            kind: "logline.view.settings.v0".to_string(),
             profile: self.profile().name.clone(),
             spine: self.profile().spine.clone(),
             packs: self.packs().iter().map(|p| p.name.clone()).collect(),
             authority_locked: true,
         }
+    }
+
+    /// Render a named read-only surface as JSON — the single contract a CLI, MCP
+    /// tool, or GUI consumes so everyone sees the same reality.
+    pub fn render_surface(&self, surface: &str, now: &str) -> Option<Value> {
+        let v = match surface {
+            "start" => serde_json::to_value(self.start()),
+            "today" => serde_json::to_value(self.today(now)),
+            "timeline" => serde_json::to_value(self.timeline(now)),
+            "schedule" => serde_json::to_value(self.schedule_view(now)),
+            "learn" => serde_json::to_value(self.learn(now)),
+            "settings" => serde_json::to_value(self.settings()),
+            _ => return None,
+        };
+        v.ok()
+    }
+
+    /// The set of read-only surfaces that can be rendered headlessly.
+    pub fn read_surfaces() -> &'static [&'static str] {
+        &["start", "today", "timeline", "schedule", "learn", "settings"]
     }
 
     /// Count of currently open (non-terminal) Acts on the spine.

@@ -1,17 +1,17 @@
 //! `labkit` — the generic LogLine Lab Kit command surface.
 //!
-//! Generic machinery only (Operator §13). A Lab needs only an identity and a
-//! profile — packs are optional complements. State lives in the file-backed
-//! outbox; the spine is rebuilt from it each run. The experience surfaces
-//! (Start/Today/Timeline/Write/Schedule/Learn/Settings) are CLI wrappers over
-//! the `labd` library grammar.
+//! Headless-first: every experience surface is a command family that prints a
+//! stable JSON read-model (each carries a `kind` contract tag). A Lab is a
+//! directory on disk (`--store`); the same Lab is identical for the CLI, an MCP
+//! client, or any future GUI/TUI. Generic machinery only (Operator §13): a Lab
+//! needs identity + profile; packs are optional complements.
 
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use logline_act::Act;
-use logline_lab_core::{LabManifest, PackManifest, ProfileManifest};
+use logline_lab_core::{bench::StudyBench, LabManifest, PackManifest, ProfileManifest};
 use logline_lab_labd::Lab;
 
 #[derive(Parser)]
@@ -30,9 +30,15 @@ struct LabArgs {
     /// Zero or more pack manifests (optional — the basics need none).
     #[arg(long = "pack")]
     packs: Vec<PathBuf>,
-    /// File-backed outbox for durable state.
+    /// Lab directory on disk (durable Acts, evidence, ghosts, candidates).
     #[arg(long)]
-    outbox: Option<PathBuf>,
+    store: Option<PathBuf>,
+}
+
+#[derive(clap::Args, Clone)]
+struct Now {
+    #[arg(long, default_value = "1970-01-01T00:00:00Z")]
+    now: String,
 }
 
 #[derive(Subcommand)]
@@ -43,7 +49,7 @@ enum Command {
     Validate { path: PathBuf },
     /// Run the offline protocol conformance suite.
     Conformance,
-    /// Inspect a Lab's wiring.
+    /// Inspect a Lab's wiring (doctor).
     Doctor {
         #[command(flatten)]
         lab: LabArgs,
@@ -55,26 +61,26 @@ enum Command {
         #[arg(long = "act")]
         acts: Vec<PathBuf>,
     },
-    /// Start surface — declare/open a Lab.
+    /// Surface: Start — declare/open a Lab and show first next actions.
     Start {
         #[command(flatten)]
         lab: LabArgs,
     },
-    /// Today surface — due/overdue/blocked/running/recent/ghosts/capacity.
+    /// Surface: Today — due/overdue/blocked/running/recent/ghosts/capacity.
     Today {
         #[command(flatten)]
         lab: LabArgs,
-        #[arg(long, default_value = "1970-01-01T00:00:00Z")]
-        now: String,
+        #[command(flatten)]
+        now: Now,
     },
-    /// Timeline surface — past/present/future Acts.
+    /// Surface: Timeline — past/present/future Acts.
     Timeline {
         #[command(flatten)]
         lab: LabArgs,
-        #[arg(long, default_value = "1970-01-01T00:00:00Z")]
-        now: String,
+        #[command(flatten)]
+        now: Now,
     },
-    /// Write surface — capture a candidate Act (ugly capture allowed).
+    /// Surface: Write — capture a candidate Act (ugly capture allowed).
     Write {
         #[command(flatten)]
         lab: LabArgs,
@@ -82,14 +88,53 @@ enum Command {
         #[arg(long)]
         json: PathBuf,
     },
-    /// Learn surface — learning report with a proposed next Act.
+    /// Surface: Schedule — show the schedule, or place an Act as a future obligation.
+    Schedule {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+        /// Act JSON file to schedule (optional — omit to just show the schedule).
+        #[arg(long)]
+        act: Option<PathBuf>,
+        /// Due time for the scheduled Act (RFC3339).
+        #[arg(long)]
+        due: Option<String>,
+    },
+    /// Surface: Workbench — run a study bench and record evidence/ghost.
+    Workbench {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+        /// Study bench JSON file.
+        #[arg(long)]
+        bench: PathBuf,
+        /// Whether the observation met expectation.
+        #[arg(long, default_value_t = false)]
+        met: bool,
+        /// Observed payload JSON file (optional).
+        #[arg(long)]
+        observed: Option<PathBuf>,
+    },
+    /// Surface: Proof — claim/evidence/receipt/ghost separation for a scope.
+    Proof {
+        #[command(flatten)]
+        lab: LabArgs,
+        /// Claim Act JSON file.
+        #[arg(long)]
+        act: PathBuf,
+        #[arg(long)]
+        scope: String,
+    },
+    /// Surface: Learn — learning report with a proposed next Act.
     Learn {
         #[command(flatten)]
         lab: LabArgs,
-        #[arg(long, default_value = "1970-01-01T00:00:00Z")]
-        now: String,
+        #[command(flatten)]
+        now: Now,
     },
-    /// Settings surface — configuration (authority always locked).
+    /// Surface: Settings — configuration (authority always locked).
     Settings {
         #[command(flatten)]
         lab: LabArgs,
@@ -102,21 +147,18 @@ fn read(path: &PathBuf) -> Result<String> {
     std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))
 }
 
-fn load(args: &LabArgs, rehydrate: bool) -> Result<Lab> {
+fn load(args: &LabArgs) -> Result<Lab> {
     let lab_m = LabManifest::load(&read(&args.lab)?).map_err(|e| anyhow::anyhow!("{e}"))?;
     let profile_m = ProfileManifest::load(&read(&args.profile)?).map_err(|e| anyhow::anyhow!("{e}"))?;
     let mut packs = Vec::new();
     for p in &args.packs {
         packs.push(PackManifest::load(&read(p)?).map_err(|e| anyhow::anyhow!("{e}"))?);
     }
-    let mut lab = match &args.outbox {
-        Some(path) => Lab::init_with_outbox(lab_m, packs, profile_m, path),
+    let lab = match &args.store {
+        Some(dir) => Lab::open(lab_m, packs, profile_m, dir),
         None => Lab::init(lab_m, packs, profile_m),
     }
     .map_err(|e| anyhow::anyhow!("{e}"))?;
-    if rehydrate {
-        lab.rehydrate().map_err(|e| anyhow::anyhow!("{e}"))?;
-    }
     Ok(lab)
 }
 
@@ -147,12 +189,9 @@ fn main() -> Result<()> {
                 std::process::exit(1);
             }
         }
-        Command::Doctor { lab } => {
-            let lab = load(&lab, true)?;
-            print_json(&lab.doctor())?;
-        }
+        Command::Doctor { lab } => print_json(&load(&lab)?.doctor())?,
         Command::Session { lab, acts } => {
-            let mut lab = load(&lab, true)?;
+            let mut lab = load(&lab)?;
             for act_path in &acts {
                 let act = Act::from_json_strict(&read(act_path)?)
                     .map_err(|e| anyhow::anyhow!("{}: {e}", act_path.display()))?;
@@ -163,17 +202,44 @@ fn main() -> Result<()> {
             println!("sync: ingested={} already_present={}", s.ingested, s.already_present);
             print_json(&lab.report("1970-01-01T00:00:00Z"))?;
         }
-        Command::Start { lab } => print_json(&load(&lab, true)?.start())?,
-        Command::Today { lab, now } => print_json(&load(&lab, true)?.today(&now))?,
-        Command::Timeline { lab, now } => print_json(&load(&lab, true)?.timeline(&now))?,
+        Command::Start { lab } => print_json(&load(&lab)?.start())?,
+        Command::Today { lab, now } => print_json(&load(&lab)?.today(&now.now))?,
+        Command::Timeline { lab, now } => print_json(&load(&lab)?.timeline(&now.now))?,
         Command::Write { lab, json } => {
-            let mut lab = load(&lab, true)?;
+            let mut lab = load(&lab)?;
             let value: serde_json::Value = serde_json::from_str(&read(&json)?)?;
-            let outcome = lab.write(&value).map_err(|e| anyhow::anyhow!("{e}"))?;
-            print_json(&outcome)?;
+            print_json(&lab.write(&value).map_err(|e| anyhow::anyhow!("{e}"))?)?;
         }
-        Command::Learn { lab, now } => print_json(&load(&lab, true)?.learn(&now))?,
-        Command::Settings { lab } => print_json(&load(&lab, false)?.settings())?,
+        Command::Schedule { lab, now, act, due } => {
+            let mut lab = load(&lab)?;
+            if let (Some(act_path), Some(due)) = (&act, &due) {
+                let a = Act::from_json_strict(&read(act_path)?).map_err(|e| anyhow::anyhow!("{e}"))?;
+                let scheduled = lab.schedule(&a, due).map_err(|e| anyhow::anyhow!("{e}"))?;
+                lab.sync().map_err(|e| anyhow::anyhow!("{e}"))?;
+                println!("scheduled {} due {}", scheduled.did.as_str().unwrap_or(""), due);
+            }
+            print_json(&lab.schedule_view(&now.now))?;
+        }
+        Command::Workbench { lab, now, bench, met, observed } => {
+            let mut lab = load(&lab)?;
+            let bench = StudyBench::load(&read(&bench)?).map_err(|e| anyhow::anyhow!("{e}"))?;
+            let observed_value = match &observed {
+                Some(p) => serde_json::from_str(&read(p)?)?,
+                None => serde_json::Value::Null,
+            };
+            let run = lab
+                .workbench(&bench, met, observed_value, "operator", &now.now)
+                .map_err(|e| anyhow::anyhow!("{e}"))?;
+            lab.sync().map_err(|e| anyhow::anyhow!("{e}"))?;
+            print_json(&run)?;
+        }
+        Command::Proof { lab, act, scope } => {
+            let lab = load(&lab)?;
+            let a = Act::from_json_strict(&read(&act)?).map_err(|e| anyhow::anyhow!("{e}"))?;
+            print_json(&lab.proof(&a, &scope))?;
+        }
+        Command::Learn { lab, now } => print_json(&load(&lab)?.learn(&now.now))?,
+        Command::Settings { lab } => print_json(&load(&lab)?.settings())?,
         Command::Scan { paths } => {
             let mut findings = 0usize;
             for p in &paths {

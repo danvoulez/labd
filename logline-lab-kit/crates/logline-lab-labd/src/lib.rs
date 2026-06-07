@@ -17,6 +17,8 @@ pub use experience::{
     ProofView, SettingsView, StartView, TimelineView, TodayView, WorkbenchRun, WriteOutcome,
 };
 
+use std::path::{Path, PathBuf};
+
 use logline_act::Act;
 use logline_lab_conformance::{builtin_vectors, run as run_conformance, ConformanceReport};
 use logline_lab_core::{
@@ -59,6 +61,28 @@ pub struct DoctorReport {
     pub ok: bool,
 }
 
+fn read_jsonl<T: serde::de::DeserializeOwned>(path: &Path) -> Result<Vec<T>, LabError> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let text = std::fs::read_to_string(path).map_err(|e| LocalError::Io(e.to_string()))?;
+    let mut out = Vec::new();
+    for line in text.lines().filter(|l| !l.trim().is_empty()) {
+        out.push(serde_json::from_str(line).map_err(|e| LocalError::Json(e.to_string()))?);
+    }
+    Ok(out)
+}
+
+fn write_jsonl<T: serde::Serialize>(path: &Path, items: &[T]) -> Result<(), LabError> {
+    let mut buf = String::new();
+    for item in items {
+        buf.push_str(&serde_json::to_string(item).map_err(|e| LocalError::Json(e.to_string()))?);
+        buf.push('\n');
+    }
+    std::fs::write(path, buf).map_err(|e| LocalError::Io(e.to_string()))?;
+    Ok(())
+}
+
 /// A running Lab.
 pub struct Lab {
     manifest: LabManifest,
@@ -70,6 +94,10 @@ pub struct Lab {
     ghosts: GhostLog,
     /// Ugly candidates preserved by Write before they could become valid Acts.
     candidates: Vec<Value>,
+    /// When set, the Lab is a directory on disk: outbox.jsonl, evidence.jsonl,
+    /// ghosts.jsonl, candidates.jsonl. This is what lets a human (via CLI) and an
+    /// LLM (via MCP) open the SAME Lab and see the same reality across runs.
+    store_dir: Option<PathBuf>,
 }
 
 impl Lab {
@@ -91,6 +119,7 @@ impl Lab {
             evidence: EvidenceLog::new(),
             ghosts: GhostLog::new(),
             candidates: Vec::new(),
+            store_dir: None,
         })
     }
 
@@ -111,7 +140,48 @@ impl Lab {
             evidence: EvidenceLog::new(),
             ghosts: GhostLog::new(),
             candidates: Vec::new(),
+            store_dir: None,
         })
+    }
+
+    /// Open a Lab as a directory on disk. The directory holds `outbox.jsonl`,
+    /// `evidence.jsonl`, `ghosts.jsonl`, and `candidates.jsonl`. Existing state is
+    /// loaded and the spine is rehydrated, so the same Lab resumes across runs and
+    /// is identical for every surface (CLI, MCP, GUI).
+    pub fn open(
+        manifest: LabManifest,
+        packs: Vec<PackManifest>,
+        profile: ProfileManifest,
+        dir: impl AsRef<Path>,
+    ) -> Result<Self, LabError> {
+        let dir = dir.as_ref().to_path_buf();
+        std::fs::create_dir_all(&dir).map_err(|e| LocalError::Io(e.to_string()))?;
+        let spine = Self::spine_for(&profile)?;
+        let outbox = LocalOutbox::open(dir.join("outbox.jsonl"))?;
+
+        let mut evidence = EvidenceLog::new();
+        for ev in read_jsonl::<Evidence>(&dir.join("evidence.jsonl"))? {
+            evidence.attach(ev);
+        }
+        let mut ghosts = GhostLog::new();
+        for g in read_jsonl::<Ghost>(&dir.join("ghosts.jsonl"))? {
+            ghosts.record(g);
+        }
+        let candidates = read_jsonl::<Value>(&dir.join("candidates.jsonl"))?;
+
+        let mut lab = Self {
+            manifest,
+            packs,
+            profile,
+            outbox,
+            spine,
+            evidence,
+            ghosts,
+            candidates,
+            store_dir: Some(dir),
+        };
+        lab.rehydrate()?;
+        Ok(lab)
     }
 
     fn spine_for(profile: &ProfileManifest) -> Result<Box<dyn Spine>, LabError> {
@@ -178,9 +248,36 @@ impl Lab {
     }
     pub fn attach_evidence(&mut self, evidence: Evidence) {
         self.evidence.attach(evidence);
+        let _ = self.persist_evidence();
     }
     pub fn record_ghost(&mut self, ghost: Ghost) {
         self.ghosts.record(ghost);
+        let _ = self.persist_ghosts();
+    }
+
+    /// Preserve an ugly candidate (used by the Write surface), persisting it.
+    pub(crate) fn push_candidate(&mut self, value: Value) -> Result<(), LabError> {
+        self.candidates.push(value);
+        self.persist_candidates()
+    }
+
+    fn persist_evidence(&self) -> Result<(), LabError> {
+        if let Some(dir) = &self.store_dir {
+            write_jsonl(&dir.join("evidence.jsonl"), self.evidence.all())?;
+        }
+        Ok(())
+    }
+    fn persist_ghosts(&self) -> Result<(), LabError> {
+        if let Some(dir) = &self.store_dir {
+            write_jsonl(&dir.join("ghosts.jsonl"), self.ghosts.all())?;
+        }
+        Ok(())
+    }
+    fn persist_candidates(&self) -> Result<(), LabError> {
+        if let Some(dir) = &self.store_dir {
+            write_jsonl(&dir.join("candidates.jsonl"), &self.candidates)?;
+        }
+        Ok(())
     }
     pub fn prepare_receipt(&self, act: &Act, scope: &str) -> Result<ReceiptCandidate, LabError> {
         Ok(ReceiptCandidate::prepare(act, scope, &self.evidence)?)

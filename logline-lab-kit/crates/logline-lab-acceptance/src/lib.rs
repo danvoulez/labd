@@ -658,3 +658,91 @@ mod tests {
             .any(|f| f.category == Category::StorageTruth));
     }
 }
+
+/// Headless contract tests: every surface emits a stable, versioned JSON
+/// read-model, and a Lab on disk resumes identically across runs. These are the
+/// contracts a GUI/TUI/MCP/external client consumes.
+#[cfg(test)]
+mod surface_contracts {
+    use super::harness::*;
+    use logline_lab_core::{bench::StudyBench, ghost::Ghost, LabManifest, ProfileManifest};
+    use logline_lab_labd::Lab;
+    use serde_json::json;
+
+    fn basics_lab() -> Lab {
+        let manifest =
+            LabManifest::load(r#"{"lab_id":"contract.local.lab","profile":"local-only"}"#).unwrap();
+        let profile = ProfileManifest::load(LOCAL_PROFILE).unwrap();
+        Lab::init(manifest, vec![], profile).unwrap()
+    }
+
+    /// Every read surface carries its stable `kind` contract tag.
+    #[test]
+    fn every_surface_has_a_kind_contract() {
+        let lab = basics_lab();
+        let now = "2026-06-07T00:00:00Z";
+        let cases = [
+            ("start", "logline.view.start.v0"),
+            ("today", "logline.view.today.v0"),
+            ("timeline", "logline.view.timeline.v0"),
+            ("schedule", "logline.view.schedule.v0"),
+            ("learn", "logline.learning_report.v0"),
+            ("settings", "logline.view.settings.v0"),
+        ];
+        for (surface, kind) in cases {
+            let v = lab.render_surface(surface, now).expect(surface);
+            assert_eq!(v["kind"], kind, "surface `{surface}` kind contract");
+        }
+    }
+
+    /// `render_surface` returns exactly the typed surface struct as JSON — one
+    /// contract, no divergence between the typed API and the headless renderer.
+    #[test]
+    fn render_surface_matches_typed_api() {
+        let lab = basics_lab();
+        let now = "2026-06-07T00:00:00Z";
+        assert_eq!(lab.render_surface("today", now).unwrap(), serde_json::to_value(lab.today(now)).unwrap());
+        assert_eq!(lab.render_surface("start", now).unwrap(), serde_json::to_value(lab.start()).unwrap());
+        assert_eq!(lab.render_surface("settings", now).unwrap(), serde_json::to_value(lab.settings()).unwrap());
+        // Unknown surfaces are rejected, not faked.
+        assert!(lab.render_surface("nope", now).is_none());
+    }
+
+    /// A Lab on disk resumes identically across runs: the same Acts, candidates,
+    /// evidence, and ghosts — the shared reality humans and LLMs both open.
+    #[test]
+    fn lab_directory_persists_full_reality() {
+        let dir = std::env::temp_dir().join(format!("llk-lab-{}-{:p}", std::process::id(), &0u8 as *const u8));
+        let _ = std::fs::remove_dir_all(&dir);
+
+        let manifest =
+            LabManifest::load(r#"{"lab_id":"persist.lab","profile":"local-only"}"#).unwrap();
+        let profile = ProfileManifest::load(LOCAL_PROFILE).unwrap();
+
+        // Run 1: write a candidate, run a bench (evidence), record a ghost, emit an Act.
+        {
+            let mut lab = Lab::open(manifest.clone(), vec![], profile.clone(), &dir).unwrap();
+            lab.write(&json!({"did": "rough idea"})).unwrap();
+            lab.emit(&act("lab", "declare_lab", json!({}), "candidate")).unwrap();
+            lab.sync().unwrap();
+            let bench = StudyBench::load(L06_BENCH).unwrap();
+            lab.workbench(&bench, true, json!({"stdout": "ok"}), "lab", "t0").unwrap();
+            lab.record_ghost(Ghost::new("G-08", "manhattan.L-06", "interface unknown", "confirm"));
+        }
+
+        // Run 2: a fresh Lab opened on the same dir sees the same reality.
+        {
+            let lab = Lab::open(manifest, vec![], profile, &dir).unwrap();
+            assert_eq!(lab.candidates().len(), 1, "candidate persisted");
+            assert!(!lab.spine().all().is_empty(), "acts persisted + rehydrated");
+            assert_eq!(lab.evidence().for_scope("manhattan.L-06").len(), 1, "evidence persisted");
+            assert_eq!(lab.ghosts().open().len(), 1, "ghost persisted");
+            // And proof reflects the persisted evidence.
+            let proof = lab.proof(&act("lab", "ethernet_ping_check", json!({}), "candidate"), "manhattan.L-06");
+            assert_eq!(proof.evidence_count, 1);
+            assert!(proof.has_receipt_candidate);
+        }
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+}
