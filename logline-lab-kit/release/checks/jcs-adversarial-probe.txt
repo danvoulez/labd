@@ -1,0 +1,34 @@
+# Adversarial JCS probe — labd hand-roll vs canon-correct (RFC 8785)
+# canon truth computed by the foundation reference JCS (verify-receipt.mjs algorithm)
+
+DIVERGE  astral_key_order
+    input: {"𐀀":1,"￿":2}
+    labd : {"￿":2,"𐀀":1}
+    canon: {"𐀀":1,"￿":2}
+MATCH    es6_large_exp
+    input: {"n":1e21}
+    labd : {"n":1e+21}
+    canon: {"n":1e+21}
+MATCH    es6_small_exp
+    input: {"n":1e-7}
+    labd : {"n":1e-7}
+    canon: {"n":1e-7}
+DIVERGE  es6_int_float
+    input: {"n":1.0}
+    labd : {"n":1.0}
+    canon: {"n":1}
+DIVERGE  es6_big_int
+    input: {"n":100000000000000000000}
+    labd : {"n":1e+20}
+    canon: {"n":100000000000000000000}
+DIVERGE  neg_zero
+    input: {"n":-0}
+    labd : {"n":-0.0}
+    canon: {"n":0}
+MATCH    frac_trailing
+    input: {"n":1.50}
+    labd : {"n":1.5}
+    canon: {"n":1.5}
+
+4/7 cases DIVERGE from the canon.
+PROOF: the hand-rolled canonicalizer is NOT RFC 8785 / JCS. Replacing it (P1) is mandatory regardless of the receipt vectors passing 20/20 — those vectors simply do not contain astral keys or ECMAScript-formatted numbers.

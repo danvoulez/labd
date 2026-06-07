@@ -215,6 +215,39 @@ mod tests {
         assert_eq!(logline_act::canonical_json(&v).unwrap(), r#"{"a":[1,0.5],"b":2,"c":"hi"}"#);
     }
 
+    /// Adversarial JCS conformance — **EXPECTED-RED until P1 (JCS replacement)**.
+    ///
+    /// Proof that labd's hand-rolled canonicalizer is NOT RFC 8785 / JCS, even though
+    /// the receipt vectors pass 20/20 (they contain no astral keys or ECMAScript-
+    /// formatted numbers). Marked `#[ignore]` so it does not break the green suite;
+    /// run `cargo test -p logline-lab-conformance -- --ignored` to see the divergence.
+    /// When P1 lands a conformant JCS impl, remove `#[ignore]` — it must then pass.
+    /// Full evidence: `release/checks/jcs-adversarial-probe.txt`.
+    #[test]
+    #[ignore = "expected-red until P1 JCS replacement; proves the hand-roll diverges from RFC 8785"]
+    fn jcs_adversarial_matches_canon() {
+        // (input JSON, canon-correct canonicalization per the foundation reference JCS)
+        let cases = [
+            (r#"{"𐀀":1,"￿":2}"#, "{\"\u{10000}\":1,\"\u{FFFF}\":2}"), // UTF-16 key order
+            (r#"{"n":1.0}"#, r#"{"n":1}"#),                            // integer-valued float
+            (r#"{"n":100000000000000000000}"#, r#"{"n":100000000000000000000}"#), // exp threshold
+            (r#"{"n":-0}"#, r#"{"n":0}"#),                             // negative zero
+        ];
+        let mut diffs = Vec::new();
+        for (input, want) in cases {
+            let v: Value = serde_json::from_str(input).unwrap();
+            let got = logline_act::canonical_json(&v).unwrap();
+            if got != want {
+                diffs.push(format!("  {input}\n    labd : {got}\n    canon: {want}"));
+            }
+        }
+        assert!(
+            diffs.is_empty(),
+            "labd canonicalization diverges from RFC 8785 / JCS:\n{}",
+            diffs.join("\n")
+        );
+    }
+
     /// A minimal, all-ASCII valid receipt verifies (labd agrees with the canon here).
     #[test]
     fn minimal_resolved_verifies() {
