@@ -10,8 +10,15 @@
 //! - `invalid`   — must be rejected (missing slot, tenth slot, …).
 //! - `ambiguous` — not strictly valid, but preservable as a candidate (ugly
 //!   capture is allowed; promotion is strict).
+//!
+//! This module is the **kit tier** (structural slot-validity over labd's own
+//! lab-formation examples in `foundation/conformance/kit-examples/`). The
+//! authoritative **canon tier** (JCS byte-exact three-layer hashing against the
+//! vendored, pinned `logline.receipt.v0` vectors) lives in [`canon`].
 
 #![forbid(unsafe_code)]
+
+pub mod canon;
 
 use logline_act::Act;
 use serde::{Deserialize, Serialize};
@@ -68,15 +75,14 @@ pub struct ExportedExample {
 }
 
 const VALID: &[(&str, &str)] = &[
-    ("v01_declare_lab", include_str!("../../../foundation/conformance/valid/v01_declare_lab.json")),
-    ("v02_observe", include_str!("../../../foundation/conformance/valid/v02_observe.json")),
+    ("v01_declare_lab", include_str!("../../../foundation/conformance/kit-examples/v01_declare_lab.json")),
+    ("v02_observe", include_str!("../../../foundation/conformance/kit-examples/v02_observe.json")),
 ];
 const INVALID: &[(&str, &str)] = &[
-    ("i01_missing_slot", include_str!("../../../foundation/conformance/invalid/i01_missing_slot.json")),
-    ("i02_tenth_slot", include_str!("../../../foundation/conformance/invalid/i02_tenth_slot.json")),
+    ("i01_missing_slot", include_str!("../../../foundation/conformance/kit-examples/i01_missing_slot.json")),
 ];
 const AMBIGUOUS: &[(&str, &str)] = &[
-    ("a01_ugly_candidate", include_str!("../../../foundation/conformance/ambiguous/a01_ugly_candidate.json")),
+    ("a01_ugly_candidate", include_str!("../../../foundation/conformance/kit-examples/a01_ugly_candidate.json")),
 ];
 
 /// The built-in reference vector set (shipped with the kit, runs offline).
@@ -163,7 +169,7 @@ mod tests {
     #[test]
     fn a13_a14_vectors_run_and_report() {
         let report = run(&builtin_vectors());
-        assert!(report.total >= 5);
+        assert!(report.total >= 4);
         assert!(report.is_green(), "report not green: {:?}", report.results);
     }
 

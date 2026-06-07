@@ -3,11 +3,12 @@
 Acceptance gates **A01–A52** from `build-pack/final-real-project-doc.md` §20.
 A test is green only with command output / inspected evidence.
 
-**Verified:** `cargo test` = **105 passed, 0 failed** (default generic set: `cargo test` over default-members; no Supabase);
-`cargo clippy --workspace --all-targets` = **0 warnings**;
-`bash install/doctor.sh` runs offline conformance + a real first session on the
-basics (no pack). The end-to-end A01–A52 mapping lives in
-`crates/logline-lab-acceptance` (51 tests; `a24_a25` and `a49_a50` are combined).
+**Verified:** `cargo test --workspace` = **120 passed, 0 failed, 0 ignored**;
+`cargo clippy --workspace --all-targets -- -D warnings` = **0 warnings**;
+the full **C3 conformance gate** (`bash release/checks/run-checks.sh`) passes:
+Rust canon harness `21/21`, Node reference verifier `21 passed`, drift check `no drift`,
+adversarial JCS probe `0/7 diverge`, doctor + no-pack fixture. The end-to-end A01–A52
+mapping lives in `crates/logline-lab-acceptance` (`a24_a25` and `a49_a50` are combined).
 
 ### Generic v0 cut — storage ontology + time (Etapas 0–6)
 The v0 generic scope is frozen in `recovery/RELEASE_SCOPE.md`. Storage was
@@ -31,6 +32,31 @@ The nine experience surfaces are now headless-first contracts, not a UI:
   `apps/mcp-server::human_and_llm_see_the_same_map`; ungranted reads are blocked.
 - Runnable proof: `examples/human-and-llm/human-flow.sh` (write → schedule → today
   → workbench → proof → learn over one durable Lab).
+
+### Canon conformance — vendored canon + JCS + envelope + hard gate (C3, 2026-06-07)
+labd is now proven against the **authoritative LogLine canon**, not only its own
+home-grown vectors:
+- Canon conformance suite **vendored and pinned** at
+  `LogLine-Foundation/conformance@389a6b676af30bf5e344f9287ef51472b7f7a53f`
+  (`foundation/conformance/canon/` + `PROVENANCE.md` + offline `.manifest.sha256`).
+- Canonicalization is **RFC 8785 / JCS** via `serde_json_canonicalizer` (vetted by
+  behavior: vectors + adversarial probe + Node verifier, not by name). The old
+  hand-rolled canonicalizer is demoted to a `#[cfg(test)]` divergence fixture — no
+  production path calls it.
+- **Transport Envelope** (LIP-0007) implemented in `logline-act`
+  (`Envelope`/`TransportMeta`/`envelope_hash`/`verify_envelope_value`).
+- **Hard C3 gate** (`release/checks/run-checks.sh`, mirrored by
+  `.github/workflows/conformance-gate.yml`): Rust harness `21/21`, Node verifier
+  `21 passed`, drift check (offline manifest + online pinned SHA), adversarial JCS
+  probe `0/7 diverge`, `cargo test --workspace`, clippy `-D warnings`, doctor, no-pack
+  fixture. No known-red, no best-effort, no local-only greenwash.
+
+NOT canon conformance: the four refurbished `foundation/conformance/kit-examples/`
+(lab-formation / candidate examples). The wrong `i02_tenth_slot` vector (it forbade
+AUX, which the canon receipt permits) is **quarantined outside the repo**. AUX is not
+a tenth slot; the Act is the internal semantic unit; the receipt is the protocol
+projection/package; the Envelope is a transport wrapper. See
+`recovery/CONFORMANCE_PLAN.md` and `recovery/CANON_ERRATA.md` (E-001).
 
 | ID | Acceptance test | Status | Evidence (test) | Module |
 |---|---|---|---|---|

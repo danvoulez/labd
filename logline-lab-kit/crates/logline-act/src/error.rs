@@ -13,4 +13,6 @@ pub enum ActError {
     StringEncoding,
     #[error("invalid act json: {0}")]
     Json(String),
+    #[error("envelope_hash mismatch: recomputed {recomputed}, declared {declared}")]
+    EnvelopeHashMismatch { recomputed: String, declared: String },
 }

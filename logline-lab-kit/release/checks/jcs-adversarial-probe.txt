@@ -1,0 +1,35 @@
+# 2026-06-07T13:26:59Z — adversarial JCS probe (REQUIRED: 0/7 cases diverge)
+# Adversarial JCS probe — labd canonicalization vs canon-correct (RFC 8785)
+# labd: serde_json_canonicalizer (P1). canon truth: foundation reference JCS.
+
+MATCH    astral_key_order
+    input: {"𐀀":1,"￿":2}
+    labd : {"𐀀":1,"￿":2}
+    canon: {"𐀀":1,"￿":2}
+MATCH    es6_large_exp
+    input: {"n":1e21}
+    labd : {"n":1e+21}
+    canon: {"n":1e+21}
+MATCH    es6_small_exp
+    input: {"n":1e-7}
+    labd : {"n":1e-7}
+    canon: {"n":1e-7}
+MATCH    es6_int_float
+    input: {"n":1.0}
+    labd : {"n":1}
+    canon: {"n":1}
+MATCH    es6_big_int
+    input: {"n":100000000000000000000}
+    labd : {"n":100000000000000000000}
+    canon: {"n":100000000000000000000}
+MATCH    neg_zero
+    input: {"n":-0}
+    labd : {"n":0}
+    canon: {"n":0}
+MATCH    frac_trailing
+    input: {"n":1.50}
+    labd : {"n":1.5}
+    canon: {"n":1.5}
+
+0/7 cases diverge from the canon.
+CONFORMANT: labd canonicalization matches RFC 8785 / JCS on every adversarial case, including the ones the receipt vectors do not exercise (astral keys, ECMAScript numbers). The historical hand-roll divergence is preserved in git and in logline-act::canonical::tests::legacy_hand_roll_diverged_from_jcs.

@@ -1,0 +1,54 @@
+# 2026-06-07T13:26:53Z — canon conformance — Rust harness (REQUIRED: 21/21 conform · 0 divergence(s))
+# LogLine canon conformance — BASELINE (reporter, not a gate)
+# vectors: /Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-conformance/../../foundation/conformance/canon/vectors/receipt
+# pinned:  LogLine-Foundation/conformance@389a6b676af30bf5e344f9287ef51472b7f7a53f
+
+✓ VALID   aux-array-order.json
+✓ VALID   aux-key-order.json
+✓ VALID   aux-nested.json
+✓ VALID   aux-number-decimal.json
+✓ VALID   aux-unicode.json
+✓ VALID   dan-rested.json
+✓ VALID   envelope.json
+✓ VALID   minimal-resolved.json
+✓ VALID   with-aux-fields.json
+✓ INVALID content-hash-mismatch.json
+✓ INVALID envelope-hash-mismatch.json
+✓ INVALID hashes-extra-field.json
+✓ INVALID hashes-has-envelope-hash.json
+✓ INVALID id-not-content-hash.json
+✓ INVALID legacy-evidence-field.json
+✓ INVALID legacy-result-field.json
+✓ INVALID legacy-transport-field.json
+✓ INVALID missing-id.json
+✓ INVALID missing-who.json
+✓ INVALID tuple-hash-mismatch.json
+✓ INVALID wrong-receipt-version.json
+
+21/21 conform · 0 divergence(s)
+GREEN — labd reproduces the canon byte-for-byte.
+
+# 2026-06-07T13:26:59Z — canon conformance — Node reference verifier (REQUIRED: 21 passed, 0 failed)
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-array-order.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-key-order.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-nested.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-number-decimal.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-unicode.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/dan-rested.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/envelope.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/minimal-resolved.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/with-aux-fields.json
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/content-hash-mismatch.json — rejected (2 errors)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/envelope-hash-mismatch.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/hashes-extra-field.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/hashes-has-envelope-hash.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/id-not-content-hash.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/legacy-evidence-field.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/legacy-result-field.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/legacy-transport-field.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/missing-id.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/missing-who.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/tuple-hash-mismatch.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/wrong-receipt-version.json — rejected (1 error)
+
+21 passed, 0 failed

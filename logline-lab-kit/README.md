@@ -84,13 +84,34 @@ flexible; the grammar is not (see [`docs/HUMAN_EXPERIENCE.md`](docs/HUMAN_EXPERI
 
 ## Protocol & conformance
 
-```sh
-labkit conformance      # runs offline; exits non-zero if not green
-```
+**Canon conformance** means labd obeys the vendored, pinned LogLine canon
+(`LogLine-Foundation/conformance@389a6b6`), proven four ways — the hard C3 gate
+([`release/checks/run-checks.sh`](release/checks/run-checks.sh)):
 
-Vectors live in `foundation/conformance/`; valid examples export with a
-deterministic `content_hash` so another Lab can compare behavior — no central
-service required ([`docs/PROTOCOL_STRATEGY.md`](docs/PROTOCOL_STRATEGY.md)).
+1. **Rust canon harness** over the vendored receipt vectors → `21/21 conform`.
+2. **Node reference verifier** cross-check (`foundation/conformance/canon/tools/verify-receipt.mjs --suite`) → `21 passed, 0 failed`.
+3. **Drift check** against the pinned SHA (offline manifest + online upstream).
+4. **Adversarial JCS probe** for RFC 8785 edge cases → `0/7 diverge`.
+
+Canonicalization is **RFC 8785 / JCS** (`serde_json_canonicalizer`, vetted by
+behavior). Three hash layers (LIP-0007): `tuple_hash` (9 slots), `content_hash`
+(receipt + AUX, the `id`), `envelope_hash` (transport wrapper, sender-computed,
+receiver-verified). See [`recovery/CONFORMANCE_PLAN.md`](recovery/CONFORMANCE_PLAN.md)
+and [`recovery/CANON_ERRATA.md`](recovery/CANON_ERRATA.md).
+
+Distinctions that matter:
+- An **Act** is the internal semantic unit (exactly nine slots). A **receipt** is
+  the protocol projection/package (`id`, `hashes`, `receipt_version`, AUX, profile).
+- **AUX is not a tenth slot** — non-reserved fields are valid AUX (in `content_hash`,
+  not `tuple_hash`). The **Envelope** is a transport wrapper, never truth, never a slot.
+- `foundation/conformance/canon/` is the authority. `foundation/conformance/kit-examples/`
+  are labd lab-formation examples, **not** canon conformance. The old `i02_tenth_slot`
+  vector was wrong (it forbade AUX) and is quarantined **outside** the repo.
+
+```sh
+labkit conformance      # kit-tier runner (offline)
+```
+([`docs/PROTOCOL_STRATEGY.md`](docs/PROTOCOL_STRATEGY.md))
 
 ## Quick start
 

@@ -1,0 +1,56 @@
+name: conformance-gate
+
+# C3 hard gate. CI runs the SAME release gate as locally (release/checks/run-checks.sh) —
+# no weaker duplicate. Required: canon harness 21/21, Node reference verifier 21 passed,
+# pinned drift check, adversarial JCS probe 0/7, full tests, clippy -D, doctor, fixture.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: logline-lab-kit
+    env:
+      # gh (used by the drift check) authenticates against the public canon repo.
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable + clippy)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo registry/git
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: logline-lab-kit
+
+      - name: Setup Node (for the reference verifier cross-check)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # NOTE: this repo does not enforce rustfmt (the existing tree is not
+      # rustfmt-default-clean); the strict style gate here is clippy -D warnings,
+      # run inside release/checks/run-checks.sh. Do not add `cargo fmt --check`
+      # without first reformatting the whole workspace as a separate decision.
+
+      - name: C3 conformance + build gate
+        run: bash release/checks/run-checks.sh
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-checks-evidence
+          path: logline-lab-kit/release/checks/*.txt
