@@ -49,3 +49,23 @@ Adopt **`genai` 0.6.5** behind the `ProviderAdapter` trait at step D — one vet
 covers Ollama (local/dev first), Anthropic, and OpenAI with rustls + permissive license and
 no agent-framework baggage. Gate final acceptance on a live Ollama round-trip. Keep
 `async-openai` as the documented fallback if footprint or the beta track becomes a problem.
+
+## D status (2026-06-07)
+
+Adopted: `genai` (+`tokio`) live in the **`logline-lab-providers`** crate, behind
+`logline_lab_session::ProviderAdapter`. The footprint is contained to that crate (and the
+CLI). Live round-trip re-verified end to end via `labkit session suggest` against an
+OpenAI-compatible endpoint: the model produced a `provider_suggested_candidate` (captured,
+not admitted; `confirmed_by` empty; full provenance). genai is an implementation detail —
+the Lab exposes the trait.
+
+## P4 supply-chain TODO (do later, not in D)
+
+The `genai` graph is large (~269 transitive crates). This is acceptable only because it
+buys commodity provider plumbing — it must never bring an agent framework into the Lab.
+Before exposing real external clients (P5), P4 must enforce:
+- `cargo-deny` (bans, licenses, advisories) + `cargo-audit` (RustSec) in CI;
+- an explicit **license policy** (current new deps: genai MIT, ryu-js Apache-2.0/BSL — OK);
+- an **SBOM** (e.g. `cargo-cyclonedx`);
+- a pinned `Cargo.lock` (present) + dependency review.
+Until then, the footprint is documented here and must not silently grow.

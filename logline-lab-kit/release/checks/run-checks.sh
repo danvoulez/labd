@@ -51,4 +51,7 @@ STORE=/tmp/llk-checks-lab bash release/examples/local-only-first-lab.sh 2>&1 | t
 stamp "provider-free resident session fixture (asserts JSON + resume)" | tee -a "$OUT/fixture.txt"
 STORE=/tmp/llk-checks-session bash release/examples/no-provider-session.sh 2>&1 | tee -a "$OUT/fixture.txt"
 
+stamp "optional provider live check (SKIPS honestly when no provider env is set)" | tee "$OUT/provider-live.txt"
+bash release/checks/provider-live.sh 2>&1 | tee -a "$OUT/provider-live.txt"
+
 echo "C3 GATE PASSED — all required conformance + build checks succeeded -> $OUT"

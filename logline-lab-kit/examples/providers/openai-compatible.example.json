@@ -1,0 +1,11 @@
+{
+  "who": "operator",
+  "did": "register_provider",
+  "this": "provider_id=openai; kind=openai-compatible; base_url=https://api.openai.com/v1; model=gpt-4o-mini; auth_env=OPENAI_API_KEY; dev_only=false",
+  "when": "2026-06-07T00:00:01Z",
+  "confirmed_by": "operator",
+  "if_ok": "provider_available_for_session_candidates",
+  "if_doubt": "keep_provider_disabled",
+  "if_not": "do_not_use_provider",
+  "status": "admitted"
+}

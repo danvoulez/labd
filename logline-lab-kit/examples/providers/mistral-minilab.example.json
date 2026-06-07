@@ -1,0 +1,11 @@
+{
+  "who": "operator",
+  "did": "register_provider",
+  "this": "provider_id=mistral-minilab; kind=openai-compatible; base_url=https://mistral.minilab.work/v1; model=default; auth_env=MISTRAL_MINILAB_API_KEY; dev_only=true",
+  "when": "2026-06-07T00:00:01Z",
+  "confirmed_by": "operator",
+  "if_ok": "provider_available_for_session_candidates",
+  "if_doubt": "keep_provider_disabled",
+  "if_not": "do_not_use_provider",
+  "status": "admitted"
+}

@@ -1,0 +1,2 @@
+# 2026-06-07T19:34:22Z — optional provider live check (SKIPS honestly when no provider env is set)
+SKIPPED: no provider configured (set LOGLINE_PROVIDER_BASE_URL + LOGLINE_PROVIDER_MODEL)

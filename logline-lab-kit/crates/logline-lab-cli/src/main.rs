@@ -155,13 +155,84 @@ enum Command {
         #[command(flatten)]
         now: Now,
     },
-    /// Surface: Settings — configuration (authority always locked).
+    /// Settings — configuration view + provider registry (authority always locked).
     Settings {
-        #[command(flatten)]
-        lab: LabArgs,
+        #[command(subcommand)]
+        cmd: SettingsCmd,
     },
     /// Scan paths for false-authority / storage-as-truth language.
     Scan { paths: Vec<PathBuf> },
+}
+
+#[derive(Subcommand)]
+enum SettingsCmd {
+    /// Show the settings read-model (authority always locked).
+    View {
+        #[command(flatten)]
+        lab: LabArgs,
+    },
+    /// Manage model provider profiles. Config only — never core semantic authority.
+    Providers {
+        #[command(subcommand)]
+        cmd: ProvidersCmd,
+    },
+}
+
+// Provider truth lives in the Lab's Acts; these commands EMIT provider-decision Acts and
+// PROJECT the registry from them. There is no registry-of-record file. Each needs a Lab
+// (`--lab/--profile/--store`) because provider config is part of a Lab's accountable history.
+#[derive(Subcommand)]
+enum ProvidersCmd {
+    /// List providers (projected from the Lab's Acts) + the availability matrix.
+    List {
+        #[command(flatten)]
+        lab: LabArgs,
+    },
+    /// Register a provider — emits a `register_provider` Act (available kind: openai-compatible).
+    Add {
+        /// Provider id (e.g. `ollama`, `openai`, `minilab`).
+        id: String,
+        #[arg(long, default_value = "openai-compatible")]
+        kind: String,
+        #[arg(long = "base-url")]
+        base_url: String,
+        #[arg(long)]
+        model: String,
+        /// Env var holding the API key/token (only the NAME is recorded; never the value).
+        #[arg(long = "api-key-env")]
+        api_key_env: Option<String>,
+        #[arg(long, default_value_t = false)]
+        dev_only: bool,
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+    },
+    /// Disable a provider — emits a `disable_provider` Act.
+    Disable {
+        id: String,
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+    },
+    /// Set the default provider — emits a `set_default_provider` Act.
+    SetDefault {
+        id: String,
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+    },
+    /// Live-test a provider (one-line round-trip; needs the configured key env) and record
+    /// a `test_provider` Act.
+    Test {
+        id: String,
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+    },
 }
 
 /// Resident session subcommands. All provider-free (step C). A provider attaches behind
@@ -222,6 +293,18 @@ enum SessionCmd {
         #[command(flatten)]
         lab: LabArgs,
     },
+    /// Ask a provider to suggest a candidate Act (candidate material only; not admitted).
+    Suggest {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+        /// Provider id (defaults to the Lab's default provider).
+        #[arg(long)]
+        provider: Option<String>,
+        #[arg(long)]
+        text: String,
+    },
 }
 
 fn read(path: &PathBuf) -> Result<String> {
@@ -251,6 +334,99 @@ fn print_json<T: serde::Serialize>(v: &T) -> Result<()> {
 fn resident(lab: &LabArgs) -> Result<ResidentSession> {
     // Provider-free resident session over a (preferably `--store`-backed) Lab.
     Ok(ResidentSession::open(load(lab)?, "resident", "operator"))
+}
+
+/// Project the provider registry from a Lab's admitted Acts. The Act graph is the truth;
+/// this projection is rebuilt every read — there is no registry-of-record file.
+fn project_registry(rs: &ResidentSession) -> logline_lab_providers::ProviderRegistry {
+    let acts: Vec<Act> = rs.lab().spine().all().iter().map(|s| s.act.clone()).collect();
+    logline_lab_providers::ProviderRegistry::project_from_acts(&acts)
+}
+
+/// Emit a provider-decision Act (the Lab admits it; the human running the command is the
+/// `confirmed_by`). This is how provider truth enters the Lab — never a config file.
+fn emit_decision(rs: &mut ResidentSession, act_value: &serde_json::Value) -> Result<()> {
+    let act = Act::from_value_strict(act_value).map_err(|e| anyhow::anyhow!("{e}"))?;
+    rs.lab_mut().emit(&act).map_err(|e| anyhow::anyhow!("{e}"))?;
+    rs.lab_mut().sync().map_err(|e| anyhow::anyhow!("{e}"))?;
+    Ok(())
+}
+
+fn run_settings(cmd: SettingsCmd) -> Result<()> {
+    use logline_lab_providers::{
+        availability, disable_provider_act, register_provider_act, set_default_provider_act,
+        test_provider_act, suggest_blocking, AuthConfig, ProviderKind, ProviderProfile,
+    };
+    match cmd {
+        SettingsCmd::View { lab } => print_json(&load(&lab)?.settings())?,
+        SettingsCmd::Providers { cmd } => match cmd {
+            ProvidersCmd::List { lab } => {
+                let rs = resident(&lab)?;
+                let reg = project_registry(&rs);
+                print_json(&serde_json::json!({
+                    "default": reg.default,
+                    "providers": reg.list(),
+                    "availability": availability()
+                        .into_iter()
+                        .map(|(k, s)| serde_json::json!({"kind": k, "status": s}))
+                        .collect::<Vec<_>>(),
+                    "source": "projected from the Lab's provider Acts (no registry-of-record file)",
+                }))?;
+            }
+            ProvidersCmd::Add { id, kind, base_url, model, api_key_env, dev_only, lab, now } => {
+                let kind = ProviderKind::parse(&kind)
+                    .ok_or_else(|| anyhow::anyhow!("unknown provider kind `{kind}`"))?;
+                if !kind.is_available() {
+                    anyhow::bail!("provider kind `{}` is SOON; only openai-compatible is available", kind.as_str());
+                }
+                let profile = ProviderProfile {
+                    id: id.clone(),
+                    kind,
+                    base_url,
+                    model,
+                    auth: AuthConfig { kind: "bearer_env".to_string(), env: api_key_env },
+                    enabled: true,
+                    dev_only,
+                };
+                let mut rs = resident(&lab)?;
+                emit_decision(&mut rs, &register_provider_act("operator", &profile, &now.now))?;
+                println!("register_provider `{id}` emitted as a LogLine Act");
+            }
+            ProvidersCmd::Disable { id, lab, now } => {
+                let mut rs = resident(&lab)?;
+                emit_decision(&mut rs, &disable_provider_act("operator", &id, &now.now))?;
+                println!("disable_provider `{id}` emitted as a LogLine Act");
+            }
+            ProvidersCmd::SetDefault { id, lab, now } => {
+                let mut rs = resident(&lab)?;
+                emit_decision(&mut rs, &set_default_provider_act("operator", &id, "resident_session", &now.now))?;
+                println!("set_default_provider `{id}` emitted as a LogLine Act");
+            }
+            ProvidersCmd::Test { id, lab, now } => {
+                let mut rs = resident(&lab)?;
+                let profile = project_registry(&rs)
+                    .get_enabled(&id)
+                    .ok_or_else(|| anyhow::anyhow!("no enabled provider `{id}` (register it first)"))?
+                    .clone();
+                let ctx = logline_lab_session::ProviderContext::default();
+                let ok = match suggest_blocking(&profile, "Reply with exactly: ok", &ctx, &now.now) {
+                    Ok(c) => {
+                        print_json(&c)?;
+                        true
+                    }
+                    Err(e) => {
+                        eprintln!("provider `{id}` test failed: {e}");
+                        false
+                    }
+                };
+                emit_decision(&mut rs, &test_provider_act("operator", &id, ok, &now.now))?;
+                if !ok {
+                    std::process::exit(1);
+                }
+            }
+        },
+    }
+    Ok(())
 }
 
 fn run_session(cmd: SessionCmd) -> Result<()> {
@@ -293,6 +469,38 @@ fn run_session(cmd: SessionCmd) -> Result<()> {
             let rs = resident(&lab)?;
             let _ = rs.close();
             println!("session closed");
+        }
+        SessionCmd::Suggest { lab, now, provider, text } => {
+            use logline_lab_providers as prov;
+            let pe = |e: logline_lab_session::ProviderError| anyhow::anyhow!("{e}");
+            let mut rs = resident(&lab)?;
+            // Resolve the provider from the registry PROJECTED from the Lab's Acts.
+            let reg = project_registry(&rs);
+            let profile = match &provider {
+                Some(id) => reg
+                    .get_enabled(id)
+                    .ok_or_else(|| anyhow::anyhow!("no enabled provider `{id}`"))?
+                    .clone(),
+                None => reg
+                    .default_profile()
+                    .ok_or_else(|| anyhow::anyhow!("no default provider; `labkit settings providers add` then `set-default`"))?
+                    .clone(),
+            };
+            // Context: the surfaces the provider may read (same JSON a human sees).
+            let today = rs.view("today", &now.now).map_err(le)?;
+            let ctx = logline_lab_session::ProviderContext {
+                surfaces: vec![("today".to_string(), today)],
+                transcript: Vec::new(),
+            };
+            // The model drafts; nothing is admitted. Provenance recorded on the candidate.
+            let candidate = prov::suggest_blocking(&profile, &text, &ctx, &now.now).map_err(pe)?;
+            // Accountable record of the call (no secrets).
+            if let Some(mp) = candidate.provenance.model.as_ref() {
+                emit_decision(&mut rs, &prov::provider_call_act("operator", mp, &now.now))?;
+            }
+            // Capture the provider-suggested candidate (model provenance; NOT admitted).
+            rs.write_candidate(candidate.candidate.clone()).map_err(le)?;
+            print_json(&candidate)?;
         }
     }
     Ok(())
@@ -383,7 +591,7 @@ fn main() -> Result<()> {
         }
         Command::Storage => print_json(&logline_lab_labd::storage_matrix())?,
         Command::Learn { lab, now } => print_json(&load(&lab)?.learn(&now.now))?,
-        Command::Settings { lab } => print_json(&load(&lab)?.settings())?,
+        Command::Settings { cmd } => run_settings(cmd)?,
         Command::Scan { paths } => {
             let mut findings = 0usize;
             for p in &paths {

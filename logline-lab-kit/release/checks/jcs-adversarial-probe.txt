@@ -1,4 +1,4 @@
-# 2026-06-07T15:50:50Z — adversarial JCS probe (REQUIRED: 0/7 cases diverge)
+# 2026-06-07T19:33:13Z — adversarial JCS probe (REQUIRED: 0/7 cases diverge)
 # Adversarial JCS probe — labd canonicalization vs canon-correct (RFC 8785)
 # labd: serde_json_canonicalizer (P1). canon truth: foundation reference JCS.
 

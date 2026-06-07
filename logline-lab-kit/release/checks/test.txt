@@ -1,117 +1,118 @@
-# 2026-06-07T15:50:12Z — cargo test --workspace (incl. canon suite + adversarial probe + envelope)
-   Compiling logline-lab-recovery-scanner v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/recovery/scanner)
-   Compiling logline-lab-hooks v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-hooks)
-   Compiling logline-act v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-act)
-   Compiling logline-lab-conformance v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-conformance)
+# 2026-06-07T19:32:16Z — cargo test --workspace (incl. canon suite + adversarial probe + envelope)
    Compiling logline-lab-supabase v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-supabase)
-   Compiling logline-lab-reports v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-reports)
+   Compiling logline-lab-providers v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-providers)
    Compiling logline-lab-acceptance v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-acceptance)
-   Compiling logline-lab-mcp-server v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/apps/mcp-server)
+   Compiling logline-lab-recovery-scanner v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/recovery/scanner)
    Compiling logline-lab-cli v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-cli)
+   Compiling logline-lab-mcp-server v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/apps/mcp-server)
    Compiling logline-lab-labd v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-labd)
-   Compiling logline-lab-projectors v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-projectors)
+   Compiling logline-lab-reports v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-reports)
    Compiling logline-lab-ruler v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-ruler)
+   Compiling logline-lab-projectors v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-projectors)
+   Compiling logline-lab-conformance v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-conformance)
    Compiling logline-lab-dispatch v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-dispatch)
    Compiling logline-lab-spine v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-spine)
-   Compiling logline-lab-clock v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-clock)
-   Compiling logline-lab-local v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-local)
    Compiling logline-lab-core v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-core)
+   Compiling logline-lab-local v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-local)
    Compiling logline-lab-session v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-session)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.83s
-     Running unittests src/lib.rs (target/debug/deps/logline_act-38798d06dbc75524)
+   Compiling logline-lab-clock v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-clock)
+   Compiling logline-act v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-act)
+   Compiling logline-lab-hooks v0.4.0-rc1 (/Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-hooks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.56s
+     Running unittests src/lib.rs (target/debug/deps/logline_act-e5e0e298f128a34c)
 
 running 12 tests
-test canonical::tests::jcs_worked_example ... ok
-test envelope::tests::envelope_hash_is_not_inside_content ... ok
-test tests::a1_nine_slots_validate ... ok
 test tests::a2_empty_slot_fails ... ok
+test tests::a1_nine_slots_validate ... ok
+test envelope::tests::envelope_hash_is_not_inside_content ... ok
 test canonical::tests::legacy_hand_roll_diverged_from_jcs ... ok
+test canonical::tests::jcs_worked_example ... ok
 test canonical::tests::jcs_matches_canon_on_adversarial_inputs ... ok
 test envelope::tests::tampered_content_fails_verification ... ok
+test tests::a2_missing_slot_fails ... ok
 test envelope::tests::seal_then_verify_round_trips ... ok
 test tests::a3_tenth_slot_fails ... ok
 test tests::a5_ugly_candidate_preserved ... ok
-test tests::a2_missing_slot_fails ... ok
 test tests::a4_same_act_same_hash ... ok
 
 test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_acceptance-f6c7be06d726d615)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_acceptance-1eefef8520ad96a3)
 
 running 63 tests
 test hardening::release_gate_is_real ... ok
-test hardening::no_false_publication_grade ... ok
 test hardening::storage_matrix_is_complete ... ok
 test surface_contracts::external_spine_is_soon_in_default_build ... ok
-test surface_contracts::every_surface_has_a_kind_contract ... ok
+test hardening::no_false_publication_grade ... ok
 test hardening::no_pack_first_session ... ok
-test surface_contracts::render_surface_matches_typed_api ... ok
-test tests::a01_exactly_nine_slots ... ok
-test tests::a03_ugly_candidates_allowed ... ok
+test surface_contracts::every_surface_has_a_kind_contract ... ok
 test surface_contracts::storage_grades_are_honest ... ok
 test hardening::admission_follows_grade ... ok
 test tests::a02_no_native_domain_authority ... ok
+test tests::a01_exactly_nine_slots ... ok
+test surface_contracts::render_surface_matches_typed_api ... ok
+test tests::a03_ugly_candidates_allowed ... ok
 test tests::a04_promotion_requires_validation ... ok
-test hardening::tick_report_contract ... ok
 test tests::a06_initialize_lab ... ok
-test tests::a05_hash_stable ... ok
 test tests::a07_lab_manifest_loads ... ok
 test tests::a09_pack_loads_without_mutating_core ... ok
-test tests::a08_profile_loads ... ok
 test tests::a10_first_candidate_created ... ok
-test tests::a15_examples_exported ... ok
-test tests::a11_first_admitted_stored ... ok
-test surface_contracts::tick_materializes_time_as_acts ... ok
+test tests::a05_hash_stable ... ok
 test tests::a13_conformance_vectors_run ... ok
+test tests::a08_profile_loads ... ok
+test tests::a11_first_admitted_stored ... ok
 test tests::a14_conformance_report_green ... ok
-test tests::a21_learning_proposes_next ... ok
-test tests::a16_examples_reproducible ... ok
+test tests::a12_first_report_renders ... ok
 test tests::a18_bench_declares_fields ... ok
 test tests::a19_bench_produces_acts ... ok
-test tests::a20_observation_evidence_or_ghost ... ok
-test tests::a12_first_report_renders ... ok
+test tests::a15_examples_exported ... ok
 test tests::a17_no_central_service_required ... ok
+test tests::a16_examples_reproducible ... ok
+test tests::a20_observation_evidence_or_ghost ... ok
+test tests::a21_learning_proposes_next ... ok
+test hardening::tick_report_contract ... ok
 test tests::a26_capacity_surfaces_idleness ... ok
 test tests::a22_schedule_future_act ... ok
 test tests::a23_discovers_due_work ... ok
+test surface_contracts::tick_materializes_time_as_acts ... ok
 test tests::a27_claim_separate_from_evidence ... ok
-test tests::a31_missing_proof_creates_ghost ... ok
 test tests::a28_model_text_is_not_evidence ... ok
-test tests::a32_start ... ok
-test tests::a35_write_captures_ugly ... ok
-test tests::a30_receipt_closes_only_scope ... ok
-test tests::a36_schedule_places_future ... ok
-test tests::a38_proof_separates ... ok
+test tests::a31_missing_proof_creates_ghost ... ok
 test tests::a24_a25_dispositions_cover_all_due ... ok
-test tests::a37_workbench_runs_bench ... ok
+test tests::a30_receipt_closes_only_scope ... ok
+test tests::a32_start ... ok
 test tests::a33_today ... ok
+test tests::a35_write_captures_ugly ... ok
+test tests::a36_schedule_places_future ... ok
 test tests::a40_settings_no_authority_bypass ... ok
-test tests::a44_unauthorized_app_blocked ... ok
-test tests::a41_santo_andre_practice_not_canon ... ok
-test tests::a43_app_call_becomes_candidate ... ok
-test tests::a42_manhattan_proof_not_identity ... ok
-test tests::a45_l06_exists_in_pack ... ok
-test tests::a46_l06_scheduled ... ok
-test tests::a39_learn_summarizes ... ok
+test tests::a38_proof_separates ... ok
 test tests::a34_timeline ... ok
-test tests::a47_l06_reached_when_due ... ok
+test tests::a41_santo_andre_practice_not_canon ... ok
+test tests::a42_manhattan_proof_not_identity ... ok
+test tests::a44_unauthorized_app_blocked ... ok
+test tests::a43_app_call_becomes_candidate ... ok
+test tests::a39_learn_summarizes ... ok
+test tests::a45_l06_exists_in_pack ... ok
+test tests::a37_workbench_runs_bench ... ok
+test tests::a46_l06_scheduled ... ok
 test tests::recovery_scans_still_hold ... ok
 test tests::a52_report_records_change_and_ghosts ... ok
+test tests::a47_l06_reached_when_due ... ok
 test tests::a48_gate_explicit_reason ... ok
 test surface_contracts::lab_directory_persists_full_reality ... ok
 test tests::a29_worker_returns_evidence_not_closure ... ok
 test tests::a49_a50_worker_runs_and_captures ... ok
 test tests::a51_l06_receipt_closes_only_l06 ... ok
 
-test result: ok. 63 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test result: ok. 63 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
-     Running unittests src/main.rs (target/debug/deps/labkit-f3183e0177d02113)
+     Running unittests src/main.rs (target/debug/deps/labkit-7a8c13aa24cdf549)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_clock-37067fc408f573b7)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_clock-313b562343784d0f)
 
 running 3 tests
 test tests::closed_act_not_due ... ok
@@ -120,82 +121,82 @@ test tests::a20_tick_evaluates_due_acts ... ok
 
 test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_conformance-97f5d1937c534374)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_conformance-0aafae088ad374ab)
 
 running 9 tests
-test canon::tests::jcs_worked_example_bytes ... ok
-test tests::a15_export_examples ... ok
-test canon::tests::tuple_hash_mismatch_rejected ... ok
-test tests::a13_a14_vectors_run_and_report ... ok
 test canon::tests::aux_field_is_not_rejected_as_tenth_slot ... ok
+test canon::tests::jcs_worked_example_bytes ... ok
 test canon::tests::jcs_adversarial_matches_canon ... ok
-test tests::a17_runs_offline ... ok
+test tests::a13_a14_vectors_run_and_report ... ok
 test canon::tests::minimal_resolved_verifies ... ok
 test tests::a16_examples_are_reproducible ... ok
+test tests::a15_export_examples ... ok
+test tests::a17_runs_offline ... ok
+test canon::tests::tuple_hash_mismatch_rejected ... ok
 
 test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/bin/conformance_baseline.rs (target/debug/deps/conformance_baseline-233047cc6ffb876b)
+     Running unittests src/bin/conformance_baseline.rs (target/debug/deps/conformance_baseline-75400f871301096f)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/bin/jcs_probe.rs (target/debug/deps/jcs_probe-ff8a7e8c49abf41b)
+     Running unittests src/bin/jcs_probe.rs (target/debug/deps/jcs_probe-c1ba09ef359ea394)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running tests/canon_suite.rs (target/debug/deps/canon_suite-644f676855d9ce1e)
+     Running tests/canon_suite.rs (target/debug/deps/canon_suite-950e2b40ee5c6734)
 
 running 2 tests
 test canon_invalid_vectors_all_rejected ... ok
 test canon_valid_vectors_all_verify ... ok
 
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_core-be2271ceaf241881)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_core-15043e3e5284c8c2)
 
 running 7 tests
-test tests::a11_evidence_attaches_to_scope ... ok
-test tests::a10_blocked_on_missing_permission_and_evidence ... ok
-test tests::a16_app_call_becomes_draft_act ... ok
-test tests::a14_pack_loads_without_changing_core ... ok
 test tests::a15_profile_loads_without_changing_core ... ok
-test tests::a12_receipt_candidate_names_exact_scope ... ok
+test tests::a10_blocked_on_missing_permission_and_evidence ... ok
 test tests::a17_unauthorized_app_blocked ... ok
+test tests::a11_evidence_attaches_to_scope ... ok
+test tests::a14_pack_loads_without_changing_core ... ok
+test tests::a16_app_call_becomes_draft_act ... ok
+test tests::a12_receipt_candidate_names_exact_scope ... ok
 
 test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_dispatch-effc048a68a85f46)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_dispatch-149ecacbfad52c1f)
 
 running 3 tests
 test tests::a18_worker_requires_allow ... ok
 test tests::dry_run_yields_evidence ... ok
 test tests::a19_worker_returns_evidence_not_closure ... ok
 
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_hooks-05c13b8249c2e386)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_hooks-006ee57e8ec5a8d2)
 
 running 1 test
 test tests::hook_runner_dispatches_matching_hooks ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_labd-d08d47074efad522)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_labd-4393800697a25165)
 
 running 5 tests
 test tests::basics_lab_runs_without_a_pack ... ok
-test resident::tests::request_promotion_does_not_admit ... ok
 test resident::tests::opens_without_provider_and_reads_surfaces ... ok
 test resident::tests::approve_mints_authorization_and_lab_admits ... ok
+test resident::tests::request_promotion_does_not_admit ... ok
 test resident::tests::resumes_after_restart_from_acts_not_a_session_store ... ok
 
 test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_local-9f751823a92684d2)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_local-5bb0dca490b20eab)
 
 running 2 tests
 test tests::reappend_is_idempotent ... ok
@@ -203,24 +204,36 @@ test tests::local_append_stores_durably ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_mcp_server-5249e2679539e61e)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_mcp_server-76ad47804595d670)
 
 running 4 tests
 test tests::unauthorized_tool_call_rejected ... ok
-test tests::ungranted_read_is_blocked ... ok
 test tests::authorized_tool_call_becomes_draft_act ... ok
+test tests::ungranted_read_is_blocked ... ok
 test tests::human_and_llm_see_the_same_map ... ok
 
 test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_projectors-c13f158f613cb828)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_projectors-41efa2e0aa4df19a)
 
 running 1 test
 test tests::a9_projection_reads_from_spine ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_recovery_scanner-0d45ed70bde4716d)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_providers-83dfd813ce9f043c)
+
+running 6 tests
+test tests::availability_matrix_marks_only_openai_compatible_available ... ok
+test tests::provider_error_is_reportable ... ok
+test tests::soon_provider_kinds_are_rejected_by_adapter ... ok
+test tests::build_candidate_carries_provenance_and_is_not_confirmation ... ok
+test tests::register_act_is_strict_string_slots_and_secret_free ... ok
+test tests::registry_projects_from_acts ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_recovery_scanner-ed7b275eff4821d5)
 
 running 2 tests
 test tests::a29_catches_false_authority ... ok
@@ -228,13 +241,13 @@ test tests::a30_rejects_storage_truth_language ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/main.rs (target/debug/deps/recovery_scan-3c67a64f247930dc)
+     Running unittests src/main.rs (target/debug/deps/recovery_scan-bdc2f45f0f0afd2e)
 
 running 0 tests
 
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_reports-ecbc1d955e8390a1)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_reports-e07c732365e19e94)
 
 running 3 tests
 test tests::a13_report_is_not_receipt ... ok
@@ -243,7 +256,7 @@ test tests::a22_report_renders_from_projections ... ok
 
 test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_ruler-f4ce986e7d3b2c25)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_ruler-c68b0a218efb415b)
 
 running 3 tests
 test tests::a26_capacity_surfaces_idleness_honestly ... ok
@@ -252,19 +265,20 @@ test tests::a24_a25_every_due_act_has_a_disposition ... ok
 
 test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_session-1cd225359e9b378e)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_session-2a8b4a89aaba8e14)
 
-running 6 tests
+running 7 tests
 test tests::model_output_is_not_confirmation ... ok
-test tests::resumes_from_events ... ok
-test tests::session_valid_without_provider ... ok
-test tests::transcript_is_a_projection ... ok
 test tests::approve_yields_authorization_candidate_not_admission ... ok
 test tests::only_human_approval_authorizes ... ok
+test tests::model_provenance_is_authorship_not_confirmation ... ok
+test tests::transcript_is_a_projection ... ok
+test tests::session_valid_without_provider ... ok
+test tests::resumes_from_events ... ok
 
-test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_spine-d02fe85855298c22)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_spine-cb0546c9357b80c7)
 
 running 2 tests
 test tests::ingest_is_idempotent ... ok
@@ -272,7 +286,7 @@ test tests::a8_sync_writes_to_spine ... ok
 
 test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-     Running unittests src/lib.rs (target/debug/deps/logline_lab_supabase-a6a4268287762795)
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_supabase-e61c5dd8e3e4fb55)
 
 running 2 tests
 test tests::builds_content_addressed_payload ... ok
@@ -341,6 +355,12 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
    Doc-tests logline_lab_projectors
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_providers
 
 running 0 tests
 
