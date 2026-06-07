@@ -14,14 +14,26 @@
 use logline_act::Act;
 use logline_lab_core::{
     bench::{BenchOutcome, StudyBench},
-    BlockContext,
+    BlockContext, Grade,
 };
+use logline_lab_clock::reschedule;
 use logline_lab_projectors::recent;
 use logline_lab_ruler::{capacity, due_work, overdue_work, CapacityState};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 use crate::{Lab, LabError};
+
+/// One storage/spine option in the onboarding matrix.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SpineOption {
+    pub id: String,
+    /// `available` | `soon`.
+    pub status: String,
+    /// `candidate-only` | `dev-ephemeral` | `publication`.
+    pub grade: String,
+    pub note: String,
+}
 
 /// Start — declare or open a Lab and confirm it can exist and remember.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -31,6 +43,13 @@ pub struct StartView {
     pub profile: String,
     pub packs: Vec<String>,
     pub spine_kind: String,
+    /// Storage grade of this Lab (candidate-only / dev-ephemeral / publication).
+    pub grade: Grade,
+    pub publication_grade: bool,
+    /// Honest warning when admitted Acts are not publication-grade.
+    pub storage_warning: Option<String>,
+    /// The storage decision matrix (what an operator may choose, with status).
+    pub storage_matrix: Vec<SpineOption>,
     pub conformance_green: bool,
     pub total_acts: usize,
     /// First valid next actions an operator (or LLM) can take.
@@ -105,6 +124,34 @@ pub struct ProofView {
     pub note: String,
 }
 
+/// The explicit disposition of one due Act at a tick.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct DueDisposition {
+    pub content_hash: String,
+    /// `executable` | `blocked`.
+    pub disposition: String,
+    pub reason: Option<String>,
+}
+
+/// Tick — the materialized confrontation with time (the ruler report). Unlike the
+/// read-only Today/Schedule views, a tick *emits Acts*: a `clock_tick` Act, a
+/// `due_disposition` Act per due Act, and `reschedule_act` Acts for overdue work.
+/// No due Act is skipped silently (A25).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct TickReport {
+    pub kind: String,
+    pub now: String,
+    pub tick_act: Option<String>,
+    pub due: Vec<DueDisposition>,
+    pub overdue: Vec<String>,
+    pub rescheduled: Vec<String>,
+    pub capacity: CapacityState,
+    pub next_study: Option<String>,
+    pub acts_emitted: usize,
+    /// When candidate-only, the tick evaluates but cannot emit (no admission).
+    pub materialized: bool,
+}
+
 /// Settings — configuration view. Authority is always locked: settings cannot
 /// bypass Act discipline, proof discipline, or gate policy.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -123,11 +170,37 @@ fn is_open(act: &Act) -> bool {
     )
 }
 
+/// The onboarding storage matrix: where admitted Acts can be registered, with
+/// honest status. Most external spines are SOON in v0 (RELEASE_SCOPE).
+pub fn storage_matrix() -> Vec<SpineOption> {
+    let row = |id: &str, status: &str, grade: &str, note: &str| SpineOption {
+        id: id.to_string(),
+        status: status.to_string(),
+        grade: grade.to_string(),
+        note: note.to_string(),
+    };
+    vec![
+        row("candidate-only", "available", "candidate-only", "capture candidates only; no admitted Acts"),
+        row("dev-ephemeral", "available", "dev-ephemeral", "local Act-log; dev-only, non-publication-grade"),
+        row("postgres", "soon", "publication", "external Postgres spine (--features supabase-profile)"),
+        row("neon", "soon", "publication", "Neon Postgres spine"),
+        row("supabase", "soon", "publication", "Supabase spine (--features supabase-profile)"),
+        row("bring-your-own", "soon", "publication", "implement the Spine trait for your own backend"),
+    ]
+}
+
 impl Lab {
-    /// Surface 1 — Start.
+    /// Surface 1 — Start. Surfaces the storage decision honestly so an operator
+    /// (or LLM) knows whether this Lab's Acts are publication-grade.
     pub fn start(&self) -> StartView {
         let total_acts = self.spine().all().len();
+        let grade = self.admission_grade();
         let mut next_actions = Vec::new();
+        if !grade.is_publication() {
+            next_actions.push(
+                "choose a Spine Profile for publication-grade Acts (see storage_matrix)".to_string(),
+            );
+        }
         if total_acts == 0 {
             next_actions.push("write the first candidate Act (labkit write)".to_string());
         }
@@ -139,6 +212,10 @@ impl Lab {
             profile: self.profile().name.clone(),
             packs: self.packs().iter().map(|p| p.name.clone()).collect(),
             spine_kind: self.spine().kind().to_string(),
+            grade,
+            publication_grade: grade.is_publication(),
+            storage_warning: grade.warning().map(|s| s.to_string()),
+            storage_matrix: storage_matrix(),
             conformance_green: self.conformance().is_green(),
             total_acts,
             next_actions,
@@ -352,6 +429,98 @@ impl Lab {
             open_ghosts,
             note: "claim, evidence, receipt candidate, and ghost are separate; a report or model text is never proof".to_string(),
         }
+    }
+
+    /// Tick the clock: confront time and materialize it as Acts. Evaluates due
+    /// work, emits a `clock_tick` Act, a `due_disposition` Act per due Act
+    /// (executable/blocked with reason), and a `reschedule_act` for each overdue
+    /// Act. Under a `candidate-only` Lab it evaluates but does not emit.
+    pub fn tick(&mut self, now: &str, next_due_at: &str) -> Result<TickReport, LabError> {
+        let materialized = self.admission_grade() != Grade::CandidateOnly;
+
+        // Evaluate (read) first — these don't depend on emission.
+        let due_acts = due_work(self.spine(), now);
+        let mut due = Vec::new();
+        for a in &due_acts {
+            let scope = a.did.as_str().unwrap_or("");
+            let ctx = BlockContext { evidence: self.evidence(), permitted: true };
+            let (disposition, reason) =
+                match logline_lab_core::evaluate_blocked(a, scope, &ctx) {
+                    Some(b) => ("blocked", Some(format!("{:?}", b.reason))),
+                    None => ("executable", None),
+                };
+            due.push(DueDisposition {
+                content_hash: a.content_hash().unwrap_or_default(),
+                disposition: disposition.to_string(),
+                reason,
+            });
+        }
+        let overdue_acts = overdue_work(self.spine(), now);
+        let overdue: Vec<String> = overdue_acts
+            .iter()
+            .map(|a| a.content_hash().unwrap_or_default())
+            .collect();
+        let executable = due.iter().filter(|d| d.disposition == "executable").count();
+        let cap = capacity(self.spine(), now, executable);
+
+        let mut acts_emitted = 0usize;
+        let mut tick_act = None;
+        let mut rescheduled = Vec::new();
+
+        if materialized {
+            // 1. The tick itself becomes an Act.
+            let tick = Act::new(
+                json!("lab.clock"),
+                json!("clock_tick"),
+                json!({ "now": now, "due": due.len(), "overdue": overdue.len() }),
+                json!(now),
+                json!("system"),
+                json!("record_tick"),
+                json!("carry"),
+                json!("skip"),
+                json!("admitted"),
+            );
+            tick_act = Some(self.emit(&tick)?.content_hash().to_string());
+            acts_emitted += 1;
+
+            // 2. Each due Act gets an explicit disposition Act (nothing skipped).
+            for d in &due {
+                let disp = Act::new(
+                    json!("lab.clock"),
+                    json!("due_disposition"),
+                    json!({ "target": d.content_hash, "disposition": d.disposition, "reason": d.reason }),
+                    json!(now),
+                    json!("system"),
+                    json!("act_on_disposition"),
+                    json!("carry_as_blocked_act"),
+                    json!("skip"),
+                    json!("admitted"),
+                );
+                self.emit(&disp)?;
+                acts_emitted += 1;
+            }
+
+            // 3. Overdue Acts get reschedule Acts.
+            for a in &overdue_acts {
+                let r = reschedule(a, next_due_at, now);
+                self.emit(&r)?;
+                rescheduled.push(r.content_hash().unwrap_or_default());
+                acts_emitted += 1;
+            }
+        }
+
+        Ok(TickReport {
+            kind: "logline.ruler_report.v0".to_string(),
+            now: now.to_string(),
+            tick_act,
+            due,
+            overdue,
+            rescheduled,
+            capacity: cap.state,
+            next_study: cap.next_study_proposal,
+            acts_emitted,
+            materialized,
+        })
     }
 
     /// Surface 8 — Learn (delegates to the learning report).

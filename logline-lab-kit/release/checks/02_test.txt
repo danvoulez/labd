@@ -1,0 +1,310 @@
+# 2026-06-07T10:22:00Z — tests (default generic set)
+   Compiling logline-lab-labd v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-labd)
+   Compiling logline-lab-mcp-server v0.1.0 (/home/user/labd/logline-lab-kit/apps/mcp-server)
+   Compiling logline-lab-acceptance v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-acceptance)
+   Compiling logline-lab-cli v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-cli)
+   Compiling logline-lab-reports v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-reports)
+   Compiling logline-lab-projectors v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-projectors)
+   Compiling logline-lab-ruler v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-ruler)
+   Compiling logline-lab-spine v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-spine)
+   Compiling logline-lab-dispatch v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-dispatch)
+   Compiling logline-lab-core v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-core)
+   Compiling logline-lab-conformance v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-conformance)
+   Compiling logline-lab-local v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-local)
+   Compiling logline-lab-clock v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-clock)
+   Compiling logline-act v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-act)
+   Compiling logline-lab-recovery-scanner v0.1.0 (/home/user/labd/logline-lab-kit/recovery/scanner)
+   Compiling logline-lab-hooks v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-hooks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.08s
+     Running unittests src/lib.rs (target/debug/deps/logline_act-2df513b9bed31ff3)
+
+running 6 tests
+test tests::a2_empty_slot_fails ... ok
+test tests::a1_nine_slots_validate ... ok
+test tests::a3_tenth_slot_fails ... ok
+test tests::a2_missing_slot_fails ... ok
+test tests::a5_ugly_candidate_preserved ... ok
+test tests::a4_same_act_same_hash ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_acceptance-48da417443955deb)
+
+running 57 tests
+test surface_contracts::external_spine_is_soon_in_default_build ... ok
+test surface_contracts::every_surface_has_a_kind_contract ... ok
+test surface_contracts::render_surface_matches_typed_api ... ok
+test tests::a01_exactly_nine_slots ... ok
+test tests::a02_no_native_domain_authority ... ok
+test surface_contracts::storage_grades_are_honest ... ok
+test tests::a03_ugly_candidates_allowed ... ok
+test tests::a04_promotion_requires_validation ... ok
+test tests::a05_hash_stable ... ok
+test tests::a06_initialize_lab ... ok
+test tests::a07_lab_manifest_loads ... ok
+test surface_contracts::tick_materializes_time_as_acts ... ok
+test tests::a09_pack_loads_without_mutating_core ... ok
+test tests::a10_first_candidate_created ... ok
+test tests::a08_profile_loads ... ok
+test surface_contracts::lab_directory_persists_full_reality ... ok
+test tests::a11_first_admitted_stored ... ok
+test tests::a13_conformance_vectors_run ... ok
+test tests::a12_first_report_renders ... ok
+test tests::a14_conformance_report_green ... ok
+test tests::a15_examples_exported ... ok
+test tests::a18_bench_declares_fields ... ok
+test tests::a17_no_central_service_required ... ok
+test tests::a19_bench_produces_acts ... ok
+test tests::a16_examples_reproducible ... ok
+test tests::a20_observation_evidence_or_ghost ... ok
+test tests::a21_learning_proposes_next ... ok
+test tests::a26_capacity_surfaces_idleness ... ok
+test tests::a22_schedule_future_act ... ok
+test tests::a23_discovers_due_work ... ok
+test tests::a27_claim_separate_from_evidence ... ok
+test tests::a28_model_text_is_not_evidence ... ok
+test tests::a24_a25_dispositions_cover_all_due ... ok
+test tests::a31_missing_proof_creates_ghost ... ok
+test tests::a30_receipt_closes_only_scope ... ok
+test tests::a32_start ... ok
+test tests::a33_today ... ok
+test tests::a34_timeline ... ok
+test tests::a35_write_captures_ugly ... ok
+test tests::a36_schedule_places_future ... ok
+test tests::a37_workbench_runs_bench ... ok
+test tests::a38_proof_separates ... ok
+test tests::a40_settings_no_authority_bypass ... ok
+test tests::a41_santo_andre_practice_not_canon ... ok
+test tests::a39_learn_summarizes ... ok
+test tests::a43_app_call_becomes_candidate ... ok
+test tests::a44_unauthorized_app_blocked ... ok
+test tests::a29_worker_returns_evidence_not_closure ... ok
+test tests::a42_manhattan_proof_not_identity ... ok
+test tests::a45_l06_exists_in_pack ... ok
+test tests::a46_l06_scheduled ... ok
+test tests::a47_l06_reached_when_due ... ok
+test tests::a48_gate_explicit_reason ... ok
+test tests::recovery_scans_still_hold ... ok
+test tests::a52_report_records_change_and_ghosts ... ok
+test tests::a49_a50_worker_runs_and_captures ... ok
+test tests::a51_l06_receipt_closes_only_l06 ... ok
+
+test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (target/debug/deps/labkit-8396c594acc0f995)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_clock-9b106260d305c01c)
+
+running 3 tests
+test tests::closed_act_not_due ... ok
+test tests::a20_tick_evaluates_due_acts ... ok
+test tests::a21_unresolved_due_act_reschedules ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_conformance-fb8089f33ee9a781)
+
+running 4 tests
+test tests::a13_a14_vectors_run_and_report ... ok
+test tests::a17_runs_offline ... ok
+test tests::a15_export_examples ... ok
+test tests::a16_examples_are_reproducible ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_core-c14ecf2b9792b63e)
+
+running 7 tests
+test tests::a11_evidence_attaches_to_scope ... ok
+test tests::a10_blocked_on_missing_permission_and_evidence ... ok
+test tests::a14_pack_loads_without_changing_core ... ok
+test tests::a12_receipt_candidate_names_exact_scope ... ok
+test tests::a17_unauthorized_app_blocked ... ok
+test tests::a15_profile_loads_without_changing_core ... ok
+test tests::a16_app_call_becomes_draft_act ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_dispatch-3d4a43ddb6044e2b)
+
+running 3 tests
+test tests::a18_worker_requires_allow ... ok
+test tests::dry_run_yields_evidence ... ok
+test tests::a19_worker_returns_evidence_not_closure ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_hooks-8772cf6c37e16e91)
+
+running 1 test
+test tests::hook_runner_dispatches_matching_hooks ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_labd-875ffe2956e1de5b)
+
+running 1 test
+test tests::basics_lab_runs_without_a_pack ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_local-58e24597a9132f21)
+
+running 2 tests
+test tests::a7_reemit_idempotent ... ok
+test tests::a6_local_emit_stores ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_mcp_server-c1cdf51a8f664801)
+
+running 4 tests
+test tests::authorized_tool_call_becomes_draft_act ... ok
+test tests::unauthorized_tool_call_rejected ... ok
+test tests::ungranted_read_is_blocked ... ok
+test tests::human_and_llm_see_the_same_map ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_projectors-613f2c0bfef8fab8)
+
+running 1 test
+test tests::a9_projection_reads_from_spine ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_recovery_scanner-d5aa888760525e96)
+
+running 2 tests
+test tests::a29_catches_false_authority ... ok
+test tests::a30_rejects_storage_truth_language ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/recovery_scan-a5b7353fcea6354a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_reports-09f29a83dfe37de9)
+
+running 3 tests
+test tests::a13_report_is_not_receipt ... ok
+test learning::tests::a21_learning_proposes_next_act ... ok
+test tests::a22_report_renders_from_projections ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_ruler-7cad38419d28a30d)
+
+running 3 tests
+test tests::a26_capacity_surfaces_idleness_honestly ... ok
+test tests::a23_discovers_due_work ... ok
+test tests::a24_a25_every_due_act_has_a_disposition ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/logline_lab_spine-721da531fb297dfd)
+
+running 2 tests
+test tests::ingest_is_idempotent ... ok
+test tests::a8_sync_writes_to_spine ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_act
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_acceptance
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_clock
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_conformance
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_dispatch
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_hooks
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_labd
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_local
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_mcp_server
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_projectors
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_recovery_scanner
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_reports
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_ruler
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests logline_lab_spine
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+test exit: 0

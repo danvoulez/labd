@@ -14,7 +14,8 @@
 mod experience;
 
 pub use experience::{
-    ProofView, SettingsView, StartView, TimelineView, TodayView, WorkbenchRun, WriteOutcome,
+    storage_matrix, DueDisposition, ProofView, ScheduleView, SettingsView, SpineOption, StartView,
+    TickReport, TimelineView, TodayView, WorkbenchRun, WriteOutcome,
 };
 
 use std::path::{Path, PathBuf};
@@ -25,11 +26,12 @@ use logline_lab_core::{
     evidence::{Evidence, EvidenceLog},
     ghost::{Ghost, GhostLog},
     receipt::{ReceiptCandidate, ReceiptError},
-    LabManifest, PackManifest, ProfileManifest,
+    Grade, LabManifest, PackManifest, ProfileManifest,
 };
 use logline_lab_local::{EmitOutcome, LocalError, LocalOutbox};
 use logline_lab_reports::{generate, generate_learning, LabReport, LearningReport};
 use logline_lab_spine::{sync, MemorySpine, Spine, SpineError, StoredAct, SyncReport};
+#[cfg(feature = "supabase-profile")]
 use logline_lab_supabase::{SupabaseConfig, SupabaseSpine};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -45,6 +47,10 @@ pub enum LabError {
     Receipt(#[from] ReceiptError),
     #[error("unknown spine kind `{0}` for profile `{1}`")]
     UnknownSpine(String, String),
+    #[error("spine unavailable: {0}")]
+    SpineUnavailable(String),
+    #[error("candidate-only Lab: cannot admit Acts without a configured Spine Profile")]
+    CandidateOnly,
 }
 
 /// Doctor report on a Lab's wiring.
@@ -54,6 +60,11 @@ pub struct DoctorReport {
     pub packs: Vec<String>,
     pub profile: String,
     pub spine_kind: String,
+    /// Storage grade implied by the Spine Profile.
+    pub grade: Grade,
+    pub publication_grade: bool,
+    /// Honest warning when the Lab is not publication-grade.
+    pub storage_warning: Option<String>,
     pub outbox_entries: usize,
     pub unsynced: usize,
     pub spine_acts: usize,
@@ -185,9 +196,23 @@ impl Lab {
     }
 
     fn spine_for(profile: &ProfileManifest) -> Result<Box<dyn Spine>, LabError> {
-        match profile.spine.as_str() {
-            "memory" | "local" | "local-only" => Ok(Box::new(MemorySpine::new())),
-            "supabase" | "postgres" => Ok(Box::new(SupabaseSpine::new(SupabaseConfig {
+        let spine = profile.spine.as_str();
+
+        // Dev / candidate spines are always available. `dev-ephemeral` is a local
+        // append-only Act-log (dev-only, non-publication); `candidate-only` admits
+        // nothing. Both back onto the in-process spine rehydrated from the store.
+        if matches!(
+            spine,
+            "candidate-only" | "dev-ephemeral" | "memory" | "local" | "local-only"
+        ) {
+            return Ok(Box::new(MemorySpine::new()));
+        }
+
+        // Publication-grade external spines: available only with the optional
+        // `supabase-profile` feature; otherwise SOON (RELEASE_SCOPE).
+        #[cfg(feature = "supabase-profile")]
+        if matches!(spine, "supabase" | "postgres") {
+            return Ok(Box::new(SupabaseSpine::new(SupabaseConfig {
                 url: profile
                     .settings
                     .get("url")
@@ -200,9 +225,22 @@ impl Lab {
                     .and_then(|v| v.as_str())
                     .unwrap_or("SUPABASE_SERVICE_KEY")
                     .to_string(),
-            }))),
-            other => Err(LabError::UnknownSpine(other.to_string(), profile.name.clone())),
+            })));
         }
+
+        if matches!(spine, "supabase" | "postgres" | "neon" | "byo" | "bring-your-own") {
+            return Err(LabError::SpineUnavailable(format!(
+                "spine `{spine}` is SOON in v0: build with `--features supabase-profile` \
+                 (postgres/supabase) or choose `dev-ephemeral` / `candidate-only`"
+            )));
+        }
+
+        Err(LabError::UnknownSpine(spine.to_string(), profile.name.clone()))
+    }
+
+    /// The protocol grade of this Lab's admitted Acts, from its Spine Profile.
+    pub fn admission_grade(&self) -> Grade {
+        self.profile.grade()
     }
 
     // --- accessors ---
@@ -229,7 +267,13 @@ impl Lab {
     }
 
     // --- core API ---
+
+    /// Admit an Act. Refused under a `candidate-only` Lab (no Spine Profile):
+    /// admission is protocol-grade and requires a declared spine.
     pub fn emit(&mut self, act: &Act) -> Result<EmitOutcome, LabError> {
+        if self.admission_grade() == Grade::CandidateOnly {
+            return Err(LabError::CandidateOnly);
+        }
         Ok(self.outbox.emit(act)?)
     }
     pub fn sync(&mut self) -> Result<SyncReport, LabError> {
@@ -300,11 +344,15 @@ impl Lab {
     /// Doctor: inspect the Lab's wiring (includes an offline conformance check).
     pub fn doctor(&self) -> DoctorReport {
         let conformance_green = self.conformance().is_green();
+        let grade = self.admission_grade();
         DoctorReport {
             lab_id: self.manifest.lab_id.clone(),
             packs: self.packs.iter().map(|p| p.name.clone()).collect(),
             profile: self.profile.name.clone(),
             spine_kind: self.spine.kind().to_string(),
+            grade,
+            publication_grade: grade.is_publication(),
+            storage_warning: grade.warning().map(|s| s.to_string()),
             outbox_entries: self.outbox.len(),
             unsynced: self.outbox.unsynced().len(),
             spine_acts: self.spine.all().len(),
@@ -353,6 +401,7 @@ mod tests {
         assert!(lab.doctor().conformance_green);
     }
 
+    #[cfg(feature = "supabase-profile")]
     #[test]
     fn supabase_profile_selects_supabase_spine() {
         let manifest =

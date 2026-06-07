@@ -10,7 +10,6 @@ logline-act.workspace = true
 logline-lab-core.workspace = true
 logline-lab-local.workspace = true
 logline-lab-spine.workspace = true
-logline-lab-supabase.workspace = true
 logline-lab-projectors.workspace = true
 logline-lab-reports.workspace = true
 logline-lab-clock.workspace = true
@@ -19,6 +18,14 @@ logline-lab-conformance.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+
+# Optional Supabase/Postgres storage profile. OFF by default — the generic kit
+# does not depend on it. Enable with `--features supabase-profile`.
+logline-lab-supabase = { workspace = true, optional = true }
+
+[features]
+default = []
+supabase-profile = ["dep:logline-lab-supabase"]
 
 [lints]
 workspace = true

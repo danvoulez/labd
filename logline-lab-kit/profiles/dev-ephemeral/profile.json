@@ -1,0 +1,7 @@
+{
+  "name": "dev-ephemeral",
+  "spine": "dev-ephemeral",
+  "settings": {
+    "description": "Local append-only Act-log spine. DEV-ONLY / unregistered / non-publication-grade. Same grade as local-only; named explicitly so the storage decision is honest."
+  }
+}

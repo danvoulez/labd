@@ -46,6 +46,13 @@ state. Nothing here is "truth" — it is a resumable cache around the Acts.
 | Proof | claim / evidence / receipt / ghost, kept separate | `labkit proof` | `logline.view.proof.v0` | (read via proof) |
 | Learn | learning report; proposes the next Act | `labkit learn` | `logline.learning_report.v0` | `read:learn` |
 | Settings | inspect config; authority always locked | `labkit settings` | `logline.view.settings.v0` | `read:settings` |
+| Tick | confront time; emit tick/disposition/reschedule Acts | `labkit tick` | `logline.ruler_report.v0` | (action) |
+| Storage | onboarding matrix: where admitted Acts register | `labkit storage` | `[SpineOption]` | (read) |
+
+Start, Today, Doctor report the storage **grade** (`candidate-only` /
+`dev-ephemeral` / `publication`) and warn when a Lab is not publication-grade
+(see [`STORAGE.md`](STORAGE.md)). `Tick` is the only surface that *materializes
+time as Acts* — no due Act is skipped silently.
 
 Read surfaces are exposed over MCP under read grants (`McpServer::grant_read`);
 the returned JSON is byte-identical to the CLI/library output (tested in

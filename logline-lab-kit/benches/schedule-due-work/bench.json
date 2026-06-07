@@ -1,0 +1,13 @@
+{
+  "id": "schedule-due-work",
+  "question": "Does scheduled work become due and get an explicit disposition?",
+  "hypothesis": "A scheduled Act becomes due at its due_at and a tick gives it a visible disposition.",
+  "inputs": {"due_at": "2026-06-06T00:00:00Z"},
+  "procedure": "Schedule an Act in the past, tick the clock, inspect dispositions.",
+  "expected": "The due Act appears and receives executable/blocked/reschedule, never skipped.",
+  "success_criteria": "Every due Act has a disposition after tick.",
+  "failure_criteria": "A due Act is silently skipped.",
+  "receipt_scope": "bench.schedule-due-work",
+  "ghost_policy": "If a due Act cannot be dispositioned, open a ghost.",
+  "allowed_tools": []
+}

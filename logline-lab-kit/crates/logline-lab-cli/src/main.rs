@@ -47,8 +47,12 @@ enum Command {
     Slots,
     /// Validate an Act JSON file against the nine-slot rule.
     Validate { path: PathBuf },
-    /// Run the offline protocol conformance suite.
-    Conformance,
+    /// Run the offline protocol conformance suite (or export comparable examples).
+    Conformance {
+        /// Print exportable examples (valid Acts + content hashes) instead of the report.
+        #[arg(long, default_value_t = false)]
+        export: bool,
+    },
     /// Inspect a Lab's wiring (doctor).
     Doctor {
         #[command(flatten)]
@@ -127,6 +131,18 @@ enum Command {
         #[arg(long)]
         scope: String,
     },
+    /// Surface: Tick — confront time; emit tick/disposition/reschedule Acts.
+    Tick {
+        #[command(flatten)]
+        lab: LabArgs,
+        #[command(flatten)]
+        now: Now,
+        /// Due time assigned to reschedule Acts for overdue work.
+        #[arg(long, default_value = "2999-01-01T00:00:00Z")]
+        next_due: String,
+    },
+    /// Show the storage/spine onboarding matrix (where admitted Acts register).
+    Storage,
     /// Surface: Learn — learning report with a proposed next Act.
     Learn {
         #[command(flatten)]
@@ -182,11 +198,16 @@ fn main() -> Result<()> {
                 std::process::exit(1);
             }
         },
-        Command::Conformance => {
-            let report = logline_lab_conformance::run(&logline_lab_conformance::builtin_vectors());
-            print_json(&report)?;
-            if !report.is_green() {
-                std::process::exit(1);
+        Command::Conformance { export } => {
+            let vectors = logline_lab_conformance::builtin_vectors();
+            if export {
+                print_json(&logline_lab_conformance::export_examples(&vectors))?;
+            } else {
+                let report = logline_lab_conformance::run(&vectors);
+                print_json(&report)?;
+                if !report.is_green() {
+                    std::process::exit(1);
+                }
             }
         }
         Command::Doctor { lab } => print_json(&load(&lab)?.doctor())?,
@@ -238,6 +259,13 @@ fn main() -> Result<()> {
             let a = Act::from_json_strict(&read(&act)?).map_err(|e| anyhow::anyhow!("{e}"))?;
             print_json(&lab.proof(&a, &scope))?;
         }
+        Command::Tick { lab, now, next_due } => {
+            let mut lab = load(&lab)?;
+            let report = lab.tick(&now.now, &next_due).map_err(|e| anyhow::anyhow!("{e}"))?;
+            lab.sync().map_err(|e| anyhow::anyhow!("{e}"))?;
+            print_json(&report)?;
+        }
+        Command::Storage => print_json(&logline_lab_labd::storage_matrix())?,
         Command::Learn { lab, now } => print_json(&load(&lab)?.learn(&now.now))?,
         Command::Settings { lab } => print_json(&load(&lab)?.settings())?,
         Command::Scan { paths } => {

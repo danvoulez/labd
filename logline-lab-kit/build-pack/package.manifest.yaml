@@ -1,0 +1,26 @@
+# LogLine Lab Kit — package manifest (control surface index)
+name: logline-lab-kit
+version: 0.3.0
+controlling_doc: build-pack/final-real-project-doc.md
+release_scope: recovery/RELEASE_SCOPE.md
+generic_v0:
+  storage_default: dev-ephemeral        # candidate-only also available; external spines SOON
+  pack_required: false                  # basics run with no pack
+  conformance: foundation/conformance
+surfaces:                               # headless contracts; see docs/SURFACES.md
+  - start
+  - today
+  - timeline
+  - write
+  - schedule
+  - workbench
+  - proof
+  - learn
+  - settings
+  - tick
+optional_soon:
+  - supabase-profile (feature)
+  - postgres / neon / bring-your-own spine
+  - santo-andre high-frequency deployment
+  - manhattan physical fleet
+  - science-core projections (PROV/RO-Crate/DataCite/CSL/ISA-Tab/JATS)

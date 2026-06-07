@@ -1,0 +1,13 @@
+{
+  "id": "proof-discipline",
+  "question": "Is a claim ever closed without evidence?",
+  "hypothesis": "A receipt candidate can only be prepared when evidence exists for the exact scope.",
+  "inputs": {"scope": "bench.proof-discipline"},
+  "procedure": "Attempt a receipt candidate with no evidence, then with attached evidence.",
+  "expected": "No receipt without evidence; receipt candidate closes only the named scope.",
+  "success_criteria": "Empty-evidence prepare fails; evidence-backed prepare names exactly one scope.",
+  "failure_criteria": "A receipt is produced without evidence, or closes more than its scope.",
+  "receipt_scope": "bench.proof-discipline",
+  "ghost_policy": "If proof is ambiguous, preserve a ghost rather than fake closure.",
+  "allowed_tools": []
+}
