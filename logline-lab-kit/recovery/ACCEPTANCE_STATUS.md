@@ -3,7 +3,7 @@
 Acceptance gates **A01–A52** from `build-pack/final-real-project-doc.md` §20.
 A test is green only with command output / inspected evidence.
 
-**Verified:** `cargo test` = **99 passed, 0 failed** (whole workspace);
+**Verified:** `cargo test` = **105 passed, 0 failed** (default generic set: `cargo test` over default-members; no Supabase);
 `cargo clippy --workspace --all-targets` = **0 warnings**;
 `bash install/doctor.sh` runs offline conformance + a real first session on the
 basics (no pack). The end-to-end A01–A52 mapping lives in
@@ -17,7 +17,7 @@ Supabase/Postgres are **out of the default build** (`default-members` +
 `labd --features supabase-profile`). Added `labkit tick` (materializes time as
 Acts), `labkit storage` (onboarding matrix), and a no-pack end-to-end fixture.
 Clean-build evidence is captured in `release/checks/` (build/test/clippy `-D
-warnings`/doctor/fixture all exit 0; **99 tests**). Tests:
+warnings`/doctor/fixture all exit 0; **105 tests**). Tests:
 `storage_grades_are_honest`, `external_spine_is_soon_in_default_build`,
 `tick_materializes_time_as_acts`, plus `release/examples/local-only-first-lab.sh`.
 

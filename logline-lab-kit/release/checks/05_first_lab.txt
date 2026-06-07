@@ -1,153 +1,37 @@
-# 2026-06-07T10:22:09Z — no-pack first-lab fixture
-## 0. storage matrix (where admitted Acts can register; external = SOON)
-[
-  {
-    "id": "candidate-only",
-    "status": "available",
-    "grade": "candidate-only",
-    "note": "capture candidates only; no admitted Acts"
-  },
-  {
-    "id": "dev-ephemeral",
-    "status": "available",
-    "grade": "dev-ephemeral",
-    "note": "local Act-log; dev-only, non-publication-grade"
-  },
-  {
-    "id": "postgres",
-    "status": "soon",
-    "grade": "publication",
-    "note": "external Postgres spine (--features supabase-profile)"
-  },
-  {
-    "id": "neon",
-    "status": "soon",
-    "grade": "publication",
-    "note": "Neon Postgres spine"
-  },
-  {
-    "id": "supabase",
-    "status": "soon",
-    "grade": "publication",
-    "note": "Supabase spine (--features supabase-profile)"
-  },
-  {
-    "id": "bring-your-own",
-    "status": "soon",
-    "grade": "publication",
-    "note": "implement the Spine trait for your own backend"
-  }
-]
-## 1. start (dev-ephemeral grade is honest about non-publication)
-{
-  "kind": "logline.view.start.v0",
-  "lab_id": "example.local.lab",
-  "profile": "local-only",
-  "packs": [],
-  "spine_kind": "memory",
-  "grade": "dev-ephemeral",
-  "publication_grade": false,
-  "storage_warning": "dev-ephemeral: admitted Acts live in a local Act-log and are NOT publication-grade. Configure an external Spine Profile to publish.",
-  "storage_matrix": [
-    {
-      "id": "candidate-only",
-      "status": "available",
-      "grade": "candidate-only",
-      "note": "capture candidates only; no admitted Acts"
-    },
-    {
-      "id": "dev-ephemeral",
-      "status": "available",
-      "grade": "dev-ephemeral",
-      "note": "local Act-log; dev-only, non-publication-grade"
-    },
-    {
-      "id": "postgres",
-      "status": "soon",
-      "grade": "publication",
-      "note": "external Postgres spine (--features supabase-profile)"
-    },
-    {
-      "id": "neon",
-      "status": "soon",
-      "grade": "publication",
-      "note": "Neon Postgres spine"
-    },
-    {
-      "id": "supabase",
-      "status": "soon",
-      "grade": "publication",
-      "note": "Supabase spine (--features supabase-profile)"
-    },
-    {
-      "id": "bring-your-own",
-      "status": "soon",
-      "grade": "publication",
-      "note": "implement the Spine trait for your own backend"
-    }
-  ],
-  "conformance_green": true,
-  "total_acts": 0,
-  "next_actions": [
-    "choose a Spine Profile for publication-grade Acts (see storage_matrix)",
-    "write the first candidate Act (labkit write)",
-    "run a study bench (labkit workbench)",
-    "check what is due today (labkit today)"
-  ]
-}
+# 2026-06-07T10:55:38Z — no-pack first-lab fixture (asserts JSON fields)
+## 0. storage matrix — external spines are SOON; local is available
+  ok: any(o['id']=='supabase' and o['status']=='soon' for o in d)
+  ok: any(o['id']=='dev-ephemeral' and o['status']=='available' for o in d)
+## 1. start — dev-ephemeral is honest: NOT publication-grade, no pack
+  ok: d['kind']=='logline.view.start.v0'
+  ok: d['publication_grade']==False and d['storage_warning'] is not None
+  ok: d['packs']==[]
 ## 2. write an ugly candidate (capture is generous)
-{
-  "outcome": "candidate",
-  "missing": [
-    "who",
-    "this",
-    "when",
-    "confirmed_by",
-    "if_ok",
-    "if_doubt",
-    "if_not",
-    "status"
-  ]
+  ok: d['outcome']=='candidate'
+## 3. refuse protocol-grade admission under candidate-only
+  ok: d['outcome']=='candidate'
+## 4. admit a valid Act (promotion is strict; dev-ephemeral admits)
 }
-## 3. admit a valid Act (promotion is strict)
-}
-## 4. offline conformance
-conformance: green
-## 5. run a study bench -> evidence
-    }
-  }
-}
-## 6. schedule a future obligation (due in the past so the tick catches it)
-scheduled
-## 7. tick: confront time (emits tick + disposition + reschedule Acts)
-  "rescheduled": [
-    "ac8424ef615fd7c1537ce36ce4d4c8c690b0d3611966c8d36910346e4f7741fd"
-  ],
-  "capacity": "healthy",
-  "next_study": null,
-  "acts_emitted": 3,
-  "materialized": true
-}
-## 8. proof for the bench scope (claim/evidence/receipt/ghost separated)
-{
-  "kind": "logline.view.proof.v0",
-  "scope": "bench.candidate-promotion",
-  "claim_act_hash": "844f7e9c93dd287078ba5658fbb0c39de9e56fccdd8626385ab64dcf95b991a3",
-  "evidence_count": 1,
-  "has_receipt_candidate": true,
-  "open_ghosts": [],
-  "note": "claim, evidence, receipt candidate, and ghost are separate; a report or model text is never proof"
-}
-## 9. learn (proposes the next Act)
-  "open_ghosts": [],
-  "next_action": "propose Act: open a new study bench to extend proven practice"
-}
-## 10. export comparable examples (protocol, not company)
-[
-  {
-    "id": "v01_declare_lab",
-    "act_json": "{\"who\":\"lab.operator\",\"did\":\"declare_lab\",\"this\":{\"lab_id\":\"ref.local.lab\"},\"when\":\"2026-06-07T00:00:00Z\",\"confirmed_by\":\"none\",\"if_ok\":\"record_declaration\",\"if_doubt\":\"carry_as_blocked_act\",\"if_not\":\"reject_declaration\",\"status\":\"candidate\"}\n",
-    "content_hash": "c69264bfc08225386f0a051b5b80ca4a8a4da9a3fa3af48afaf8fe88b34e378e"
-  },
-## OK: no-pack dev-ephemeral first Lab completed end-to-end.
-fixture exit: 0
+## 5. offline conformance
+  conformance: green
+## 6. export comparable examples (protocol, not company)
+  ok: len(d)>=1 and all(len(e['content_hash'])==64 for e in d)
+## 7. run a study bench -> evidence
+  ok: d['kind']=='logline.view.workbench.v0' and d['acts_emitted']==2
+## 8. schedule a future obligation (due in the past so the tick catches it)
+  scheduled
+## 9. tick — materialize time as Acts; no due Act skipped
+  ok: d['kind']=='logline.ruler_report.v0' and d['materialized']==True
+  ok: len(d['due'])>=1 and d['acts_emitted']>=2 and d['tick_act'] is not None
+## 10. today — the disposition Act was emitted and is visible
+  ok: 'clock_tick' in d['recent'] and 'due_disposition' in d['recent']
+## 11. timeline — past/present/future
+  ok: d['kind']=='logline.view.timeline.v0' and (len(d['past'])+len(d['present'])+len(d['future']))>=1
+## 12. proof — evidence attached; receipt candidate possible; separated
+  ok: d['evidence_count']>=1 and d['has_receipt_candidate']==True
+## 13. learn — proposes the next Act
+  ok: 'propose' in d['next_action']
+## 14. no third-party dependency: store has only local jsonl files
+  ok: local actlog.jsonl is the dev-ephemeral record
+  ok: no supabase/manhattan/santo in local store
+## OK: no-pack dev-ephemeral first Lab completed end-to-end (asserted).

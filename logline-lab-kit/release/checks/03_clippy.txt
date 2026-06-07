@@ -1,21 +1,21 @@
-# 2026-06-07T10:22:04Z — clippy -D warnings
+# 2026-06-07T10:55:33Z — clippy -D warnings (default members + all targets)
     Checking serde_core v1.0.228
     Checking zmij v1.0.21
-    Checking itoa v1.0.18
     Checking memchr v2.8.1
+    Checking itoa v1.0.18
     Checking typenum v1.20.1
-    Checking cpufeatures v0.2.17
     Checking cfg-if v1.0.4
+    Checking cpufeatures v0.2.17
     Checking thiserror v2.0.18
     Checking utf8parse v0.2.2
     Checking anstyle-parse v1.0.0
     Checking anstyle-query v1.1.5
-    Checking colorchoice v1.0.5
-    Checking anstyle v1.0.14
     Checking is_terminal_polyfill v1.70.2
+    Checking anstyle v1.0.14
+    Checking colorchoice v1.0.5
     Checking clap_lex v1.1.0
-    Checking anstream v1.0.0
     Checking strsim v0.11.1
+    Checking anstream v1.0.0
     Checking anyhow v1.0.102
     Checking clap_builder v4.6.0
     Checking generic-array v0.14.7
@@ -23,25 +23,23 @@
     Checking block-buffer v0.10.4
     Checking digest v0.10.7
     Checking sha2 v0.10.9
-    Checking clap v4.6.1
-    Checking serde v1.0.228
     Checking serde_json v1.0.150
-    Checking logline-act v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-act)
-    Checking logline-lab-recovery-scanner v0.1.0 (/home/user/labd/logline-lab-kit/recovery/scanner)
-    Checking logline-lab-hooks v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-hooks)
-    Checking logline-lab-local v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-local)
-    Checking logline-lab-core v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-core)
-    Checking logline-lab-clock v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-clock)
-    Checking logline-lab-spine v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-spine)
-    Checking logline-lab-conformance v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-conformance)
-    Checking logline-lab-supabase v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-supabase)
-    Checking logline-lab-projectors v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-projectors)
-    Checking logline-lab-ruler v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-ruler)
-    Checking logline-lab-dispatch v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-dispatch)
-    Checking logline-lab-reports v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-reports)
-    Checking logline-lab-labd v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-labd)
-    Checking logline-lab-mcp-server v0.1.0 (/home/user/labd/logline-lab-kit/apps/mcp-server)
-    Checking logline-lab-cli v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-cli)
-    Checking logline-lab-acceptance v0.1.0 (/home/user/labd/logline-lab-kit/crates/logline-lab-acceptance)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.84s
-clippy exit: 0
+    Checking serde v1.0.228
+    Checking clap v4.6.1
+    Checking logline-act v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-act)
+    Checking logline-lab-recovery-scanner v0.4.0-rc1 (/home/user/labd/logline-lab-kit/recovery/scanner)
+    Checking logline-lab-hooks v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-hooks)
+    Checking logline-lab-core v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-core)
+    Checking logline-lab-local v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-local)
+    Checking logline-lab-clock v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-clock)
+    Checking logline-lab-conformance v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-conformance)
+    Checking logline-lab-spine v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-spine)
+    Checking logline-lab-projectors v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-projectors)
+    Checking logline-lab-ruler v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-ruler)
+    Checking logline-lab-dispatch v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-dispatch)
+    Checking logline-lab-reports v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-reports)
+    Checking logline-lab-labd v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-labd)
+    Checking logline-lab-mcp-server v0.4.0-rc1 (/home/user/labd/logline-lab-kit/apps/mcp-server)
+    Checking logline-lab-cli v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-cli)
+    Checking logline-lab-acceptance v0.4.0-rc1 (/home/user/labd/logline-lab-kit/crates/logline-lab-acceptance)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.50s

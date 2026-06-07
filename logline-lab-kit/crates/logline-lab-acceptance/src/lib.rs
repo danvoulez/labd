@@ -820,3 +820,94 @@ mod surface_contracts {
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
+
+/// Etapa 6.5 — generic v0 hardening: honest grades, no false publication claims,
+/// tick contract, storage matrix completeness, and a real release gate.
+#[cfg(test)]
+mod hardening {
+    use super::harness::*;
+    use logline_lab_core::{Grade, LabManifest, ProfileManifest};
+    use logline_lab_labd::{storage_matrix, Lab};
+    use serde_json::json;
+
+    fn lab(spine: &str) -> Lab {
+        let m = LabManifest::load(&format!(r#"{{"lab_id":"h.lab","profile":"{spine}"}}"#)).unwrap();
+        let p = ProfileManifest::load(&format!(r#"{{"name":"{spine}","spine":"{spine}"}}"#)).unwrap();
+        Lab::init(m, vec![], p).unwrap()
+    }
+
+    /// No external profile may claim publication-grade from configuration alone:
+    /// external spines are at most `Staged`, and `Staged.is_publication()` is false.
+    #[test]
+    fn no_false_publication_grade() {
+        for spine in ["supabase", "postgres", "neon", "byo", "bring-your-own"] {
+            let p = ProfileManifest::load(&format!(r#"{{"name":"x","spine":"{spine}"}}"#)).unwrap();
+            assert_eq!(p.grade(), Grade::Staged, "{spine} must be staged, not publication");
+            assert!(!p.grade().is_publication(), "{spine} must not be publication-grade");
+        }
+        // Dev/candidate grades are also non-publication.
+        let dev = ProfileManifest::load(r#"{"name":"d","spine":"dev-ephemeral"}"#).unwrap();
+        assert!(!dev.grade().is_publication());
+        assert_eq!(dev.grade(), Grade::DevEphemeral);
+        let co = ProfileManifest::load(r#"{"name":"c","spine":"candidate-only"}"#).unwrap();
+        assert_eq!(co.grade(), Grade::CandidateOnly);
+    }
+
+    /// candidate-only cannot admit; dev-ephemeral admits but is non-publication.
+    #[test]
+    fn admission_follows_grade() {
+        let a = act("lab", "declare_lab", json!({}), "candidate");
+        let mut co = lab("candidate-only");
+        assert!(co.emit(&a).is_err());
+        let mut dev = lab("dev-ephemeral");
+        assert!(dev.emit(&a).is_ok());
+        assert!(!dev.start().publication_grade);
+        assert!(dev.start().storage_warning.is_some());
+    }
+
+    /// The tick report matches its contract (all fields present, correct kind).
+    #[test]
+    fn tick_report_contract() {
+        let mut lab = lab("dev-ephemeral");
+        lab.schedule(&act("lab", "check", json!({}), "candidate"), "2026-06-06T00:00:00Z").unwrap();
+        lab.sync().unwrap();
+        let report = lab.tick("2026-06-06T12:00:00Z", "2026-06-07T00:00:00Z").unwrap();
+        let v = serde_json::to_value(&report).unwrap();
+        for field in ["kind","now","tick_act","due","overdue","rescheduled","capacity","next_study","acts_emitted","materialized"] {
+            assert!(v.get(field).is_some(), "tick report missing `{field}`");
+        }
+        assert_eq!(v["kind"], "logline.ruler_report.v0");
+        assert!(report.materialized);
+    }
+
+    /// The storage matrix includes every expected option with honest status.
+    #[test]
+    fn storage_matrix_is_complete() {
+        let m = storage_matrix();
+        for id in ["candidate-only", "dev-ephemeral", "postgres", "neon", "supabase", "bring-your-own"] {
+            assert!(m.iter().any(|o| o.id == id), "storage matrix missing `{id}`");
+        }
+        assert!(m.iter().any(|o| o.id == "dev-ephemeral" && o.status == "available"));
+        assert!(m.iter().all(|o| o.id == "candidate-only" || o.id == "dev-ephemeral" || o.status == "soon"));
+    }
+
+    /// A no-pack first session needs no pack.
+    #[test]
+    fn no_pack_first_session() {
+        let mut lab = lab("dev-ephemeral");
+        assert!(lab.packs().is_empty());
+        lab.emit(&act("lab", "declare_lab", json!({}), "candidate")).unwrap();
+        lab.sync().unwrap();
+        assert_eq!(lab.report("t0").total_acts, 1);
+    }
+
+    /// The release gate script actually gates (fails on any subcommand failure).
+    #[test]
+    fn release_gate_is_real() {
+        let script = include_str!("../../../release/checks/run-checks.sh");
+        assert!(script.contains("set -euo pipefail"), "run-checks.sh must fail-fast");
+        for cmd in ["cargo build", "cargo test", "cargo clippy --all-targets -- -D warnings", "install/doctor.sh", "local-only-first-lab.sh"] {
+            assert!(script.contains(cmd), "release gate missing step: {cmd}");
+        }
+    }
+}

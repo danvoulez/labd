@@ -61,17 +61,23 @@ Homebrew / GitHub Actions distribution
 resident labd daemon loop (v0 ships labd as embeddable host lib + CLI-driven host)
 ```
 
-## Storage grades (Etapa 1)
+## Storage grades (Etapa 1, hardened in Etapa 6.5)
 
 ```txt
 candidate-only   capture candidates only; cannot claim protocol-grade admission
-dev-ephemeral    local append-only Act-log spine; DEV-ONLY / unregistered /
+dev-ephemeral    local append-only Act-log (LocalActLog); DEV-ONLY / unregistered /
                  non-publication-grade
-publication      a declared external Spine Profile (postgres/neon/supabase/byo) —
-                 SOON in v0; required for publication-grade admitted Acts
+staged           an external Spine Profile is selected but UNPROVEN (compiles/stages
+                 only) — explicitly NOT publication-grade
+publication      only after an external-spine doctor proves: Act admitted -> written
+                 to the declared external spine -> read back -> hash preserved ->
+                 conformance/export still reproducible. Never inferred from config.
+                 SOON in v0.
 ```
 
-Acts admitted without a publication-grade spine are labelled `dev-only`.
+Acts admitted without a publication-grade spine are labelled `dev-only` (or
+`staged`). Selecting `postgres`/`neon`/`supabase`/`byo` yields `staged`, never
+`publication`.
 
 ## Santo André note (the source of the storage noise)
 

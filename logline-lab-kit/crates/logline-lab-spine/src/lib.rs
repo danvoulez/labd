@@ -11,7 +11,7 @@
 use std::collections::BTreeMap;
 
 use logline_act::Act;
-use logline_lab_local::LocalOutbox;
+use logline_lab_local::LocalActLog;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -100,17 +100,20 @@ impl Spine for MemorySpine {
     }
 }
 
-/// Report of a sync run.
+/// Report of a replay run (local Act-log → query spine).
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct SyncReport {
     pub ingested: usize,
     pub already_present: usize,
 }
 
-/// Sync all unsynced outbox entries to the spine, marking them synced (A8).
-pub fn sync(outbox: &mut LocalOutbox, spine: &mut dyn Spine) -> Result<SyncReport, SpineError> {
-    let pending: Vec<(String, Act)> = outbox
-        .unsynced()
+/// Replay all not-yet-replayed entries from the local Act-log into the configured
+/// spine, marking them replayed. (For `dev-ephemeral` this rebuilds the in-process
+/// query store from the durable local Act-log; a future external `TransportOutbox`
+/// would reuse the same idempotent ingest.)
+pub fn sync(act_log: &mut LocalActLog, spine: &mut dyn Spine) -> Result<SyncReport, SpineError> {
+    let pending: Vec<(String, Act)> = act_log
+        .unreplayed()
         .into_iter()
         .map(|e| (e.content_hash.clone(), e.act.clone()))
         .collect();
@@ -121,8 +124,8 @@ pub fn sync(outbox: &mut LocalOutbox, spine: &mut dyn Spine) -> Result<SyncRepor
             IngestOutcome::Ingested(_) => report.ingested += 1,
             IngestOutcome::AlreadyPresent(_) => report.already_present += 1,
         }
-        outbox
-            .mark_synced(&hash)
+        act_log
+            .mark_replayed(&hash)
             .map_err(|e| SpineError::Backend(e.to_string()))?;
     }
     Ok(report)
@@ -150,18 +153,18 @@ mod tests {
     /// A8 — Sync writes Act to configured spine (and is idempotent).
     #[test]
     fn a8_sync_writes_to_spine() {
-        let mut outbox = LocalOutbox::in_memory();
-        outbox.emit(&sample_act("declare_lab")).unwrap();
-        outbox.emit(&sample_act("declare_other")).unwrap();
+        let mut act_log = LocalActLog::in_memory();
+        act_log.emit(&sample_act("declare_lab")).unwrap();
+        act_log.emit(&sample_act("declare_other")).unwrap();
 
         let mut spine = MemorySpine::new();
-        let report = sync(&mut outbox, &mut spine).unwrap();
+        let report = sync(&mut act_log, &mut spine).unwrap();
         assert_eq!(report.ingested, 2);
         assert_eq!(spine.all().len(), 2);
-        assert!(outbox.unsynced().is_empty());
+        assert!(act_log.unreplayed().is_empty());
 
         // A second sync is a no-op (already synced + idempotent ingest).
-        let report2 = sync(&mut outbox, &mut spine).unwrap();
+        let report2 = sync(&mut act_log, &mut spine).unwrap();
         assert_eq!(report2.ingested, 0);
         assert_eq!(spine.all().len(), 2);
     }

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Storage Matrix",
+  "description": "Output of `labkit storage` and StartView.storage_matrix: the onboarding decision of where admitted Acts register.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "status", "grade", "note"],
+    "properties": {
+      "id": { "type": "string" },
+      "status": { "type": "string", "enum": ["available", "soon"] },
+      "grade": { "type": "string", "enum": ["candidate-only", "dev-ephemeral", "staged", "publication"] },
+      "note": { "type": "string" }
+    }
+  }
+}

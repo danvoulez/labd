@@ -1,4 +1,4 @@
-# Release — LogLine Lab Kit v0.1.0
+# Release — LogLine Lab Kit v0.4.0-rc1
 
 ## Artifacts
 
@@ -18,7 +18,7 @@ present; the chosen channel is an open decision.
 ## Verify
 
 ```sh
-cargo test          # A1-A30, 43 tests
+cargo test          # default generic set (A01-A52 + 6.5 hardening)
 cargo clippy --workspace --all-targets
 bash install/doctor.sh
 ```

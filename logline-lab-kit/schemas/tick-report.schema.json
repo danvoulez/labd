@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LogLine Tick Report",
+  "description": "Output of the Tick surface (Lab::tick / `labkit tick`). Identical contract to schemas/ruler-report.schema.json; kind == logline.ruler_report.v0.",
+  "$ref": "./ruler-report.schema.json"
+}

@@ -1,4 +1,4 @@
-# 2026-06-07T10:22:09Z — install doctor
+# 2026-06-07T10:55:38Z — install doctor
 ==> rust toolchain
 cargo 1.94.1 (29ea6fb6a 2026-03-24)
 ==> build check
@@ -24,4 +24,3 @@ sync: ingested=1 already_present=0
   ]
 }
 ==> doctor OK
-doctor exit: 0
