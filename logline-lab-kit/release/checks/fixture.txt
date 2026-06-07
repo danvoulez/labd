@@ -1,4 +1,4 @@
-# 2026-06-07T10:55:38Z — no-pack first-lab fixture (asserts JSON fields)
+# 2026-06-07T13:27:32Z — no-pack first-lab fixture (asserts JSON fields)
 ## 0. storage matrix — external spines are SOON; local is available
   ok: any(o['id']=='supabase' and o['status']=='soon' for o in d)
   ok: any(o['id']=='dev-ephemeral' and o['status']=='available' for o in d)

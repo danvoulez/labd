@@ -1,10 +1,8 @@
-//! Canon-tier conformance BASELINE reporter.
+//! Canon-tier conformance harness (C3 gate).
 //!
 //! Walks the vendored, pinned canon receipt vectors and runs labd's canonicalization
 //! against them via `logline_lab_conformance::canon`. Prints a per-vector PASS/FAIL
-//! report. This is a **reporter, not a gate**: it always exits 0 so it can record an
-//! honest RED baseline without breaking `cargo test`. The enforcing gate is wired only
-//! once the SDK plan turns the canon tier green (CONFORMANCE_PLAN phase C3).
+//! report and **exits non-zero on any divergence** so the release gate / CI fail hard.
 //!
 //! A vector "conforms" when labd's verdict matches the vector's directory:
 //!   valid/*   → must verify OK
@@ -86,11 +84,8 @@ fn main() {
     let total = pass + fail;
     println!("\n{pass}/{total} conform · {fail} divergence(s)");
     if fail > 0 {
-        println!(
-            "RED baseline — divergences are expected pre-SDK-plan (JCS canonicalization, \
-             missing envelope primitive, receipt projection). See recovery/CONFORMANCE_PLAN.md."
-        );
-    } else {
-        println!("GREEN — labd reproduces the canon byte-for-byte.");
+        println!("FAIL — labd diverges from the vendored canon. Gate must not pass.");
+        std::process::exit(1);
     }
+    println!("GREEN — labd reproduces the canon byte-for-byte.");
 }

@@ -163,5 +163,14 @@ own Node verifier. Buy-don't-build and the Act/projection invariant hold through
   recorded (`recovery/CANON_ERRATA.md`: exponent sign `1e+21`, reference wins over prose).
   Hash stability: canon-valid vectors unchanged; only non-conformant edge-case bytes changed
   (nothing admitted relied on them). 118 tests pass, clippy clean, doctor + fixture green.
-- ⏳ **C3 gate** — now unblocked (no known-red). Wire as a hard CI/release gate:
-  Rust harness + Node cross-check + drift check + full tests + clippy -D.
+- ✅ **C3 hard gate** — `release/checks/run-checks.sh` wires all required checks and
+  fails non-zero on any: Rust canon harness `21/21`, Node reference verifier `21 passed`,
+  drift check (offline `.manifest.sha256` + online pinned SHA), adversarial JCS probe
+  `0/7`, `cargo test --workspace` (120 pass, 0 ignored), clippy `-D warnings`, doctor,
+  no-pack fixture. Mirrored in CI by `.github/workflows/conformance-gate.yml` (same gate,
+  not a weaker duplicate). The harness binaries now exit non-zero on divergence; the canon
+  sweep is also a `cargo test` (`tests/canon_suite.rs`). Evidence regenerated in
+  `release/checks/*.txt`. **No known-red, no best-effort, no local-only greenwash.**
+
+**C3 complete (2026-06-07). Conformance is now a hard gate. Do not start Postgres / MCP
+server / packaging / science-core until this is committed.**

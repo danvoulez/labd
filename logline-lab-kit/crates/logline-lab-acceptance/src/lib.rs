@@ -903,12 +903,26 @@ mod hardening {
         assert_eq!(lab.report("t0").total_acts, 1);
     }
 
-    /// The release gate script actually gates (fails on any subcommand failure).
+    /// The release gate script actually gates (fails on any subcommand failure) and
+    /// wires every required C3 conformance check.
     #[test]
     fn release_gate_is_real() {
         let script = include_str!("../../../release/checks/run-checks.sh");
         assert!(script.contains("set -euo pipefail"), "run-checks.sh must fail-fast");
-        for cmd in ["cargo build", "cargo test", "cargo clippy --all-targets -- -D warnings", "install/doctor.sh", "local-only-first-lab.sh"] {
+        for cmd in [
+            // build + lint + tests
+            "cargo build",
+            "cargo test --workspace",
+            "cargo clippy --workspace --all-targets -- -D warnings",
+            // C3 conformance: Rust harness, Node reference verifier, drift, adversarial probe
+            "conformance_baseline",
+            "verify-receipt.mjs --suite",
+            "check-drift.sh",
+            "jcs_probe",
+            // doctor + no-pack fixture
+            "install/doctor.sh",
+            "local-only-first-lab.sh",
+        ] {
             assert!(script.contains(cmd), "release gate missing step: {cmd}");
         }
     }

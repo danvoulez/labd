@@ -1,3 +1,4 @@
+# 2026-06-07T13:26:53Z — canon conformance — Rust harness (REQUIRED: 21/21 conform · 0 divergence(s))
 # LogLine canon conformance — BASELINE (reporter, not a gate)
 # vectors: /Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-conformance/../../foundation/conformance/canon/vectors/receipt
 # pinned:  LogLine-Foundation/conformance@389a6b676af30bf5e344f9287ef51472b7f7a53f
@@ -27,22 +28,27 @@
 21/21 conform · 0 divergence(s)
 GREEN — labd reproduces the canon byte-for-byte.
 
-================================================================
-# EXTERNAL CROSS-CHECK — foundation reference verifier (Node, zero-dep)
-# node v20.20.2 · verify-receipt.mjs --suite
-================================================================
+# 2026-06-07T13:26:59Z — canon conformance — Node reference verifier (REQUIRED: 21 passed, 0 failed)
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-array-order.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-key-order.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-nested.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-number-decimal.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/aux-unicode.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/dan-rested.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/envelope.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/minimal-resolved.json
+✓ VALID   foundation/conformance/canon/vectors/receipt/valid/with-aux-fields.json
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/content-hash-mismatch.json — rejected (2 errors)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/envelope-hash-mismatch.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/hashes-extra-field.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/hashes-has-envelope-hash.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/id-not-content-hash.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/legacy-evidence-field.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/legacy-result-field.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/legacy-transport-field.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/missing-id.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/missing-who.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/tuple-hash-mismatch.json — rejected (1 error)
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/wrong-receipt-version.json — rejected (1 error)
 
 21 passed, 0 failed
-
-# STATUS after P1 (JCS replacement via serde_json_canonicalizer 0.3.2):
-#   labd 21/21 == Node reference 21/21. Adversarial probe 7/7 CONFORMANT.
-#
-# BEFORE/AFTER HASH STABILITY (rule 6):
-#   - Canon receipt vectors (20) + envelope (1): labd reproduces the embedded
-#     canon hashes both BEFORE (hand-roll, 20/20) and AFTER (JCS, 21/21).
-#     => tuple/content/envelope hashes are STABLE for canon-valid inputs.
-#   - Adversarial edge cases (astral keys, ES6 numbers, -0): hashes CHANGED,
-#     by design — the old hand-roll bytes were non-conformant. No admitted Act
-#     used those forms, so nothing stored is invalidated.
-#   - Old hand-roll retained ONLY as a #[cfg(test)] divergence fixture
-#     (logline-act::canonical::tests). No production path calls it.

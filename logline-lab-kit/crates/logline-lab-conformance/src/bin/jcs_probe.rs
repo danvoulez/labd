@@ -58,6 +58,7 @@ fn main() {
              logline-act::canonical::tests::legacy_hand_roll_diverged_from_jcs."
         );
     } else {
-        println!("REGRESSION: labd diverges from the canon — P1 canonicalization is broken.");
+        println!("REGRESSION: labd diverges from the canon — JCS canonicalization is broken.");
+        std::process::exit(1);
     }
 }
