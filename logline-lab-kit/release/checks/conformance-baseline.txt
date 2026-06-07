@@ -1,0 +1,51 @@
+# LogLine canon conformance — BASELINE (reporter, not a gate)
+# vectors: /Users/ubl-ops/Documents/LAB3/labd/logline-lab-kit/crates/logline-lab-conformance/../../foundation/conformance/canon/vectors/receipt
+# pinned:  LogLine-Foundation/conformance@389a6b676af30bf5e344f9287ef51472b7f7a53f
+
+✓ VALID   aux-array-order.json
+✓ VALID   aux-key-order.json
+✓ VALID   aux-nested.json
+✓ VALID   aux-number-decimal.json
+✓ VALID   aux-unicode.json
+✓ VALID   dan-rested.json
+✗ VALID   envelope.json — expected VALID, labd rejected: envelope_hash verification UNSUPPORTED: logline-act provides no envelope canonicalization primitive (compute_envelope_hash) — see CONFORMANCE_PLAN divergence #2
+✓ VALID   minimal-resolved.json
+✓ VALID   with-aux-fields.json
+✓ INVALID content-hash-mismatch.json
+✓ INVALID envelope-hash-mismatch.json
+✓ INVALID hashes-extra-field.json
+✓ INVALID hashes-has-envelope-hash.json
+✓ INVALID id-not-content-hash.json
+✓ INVALID legacy-evidence-field.json
+✓ INVALID legacy-result-field.json
+✓ INVALID legacy-transport-field.json
+✓ INVALID missing-id.json
+✓ INVALID missing-who.json
+✓ INVALID tuple-hash-mismatch.json
+✓ INVALID wrong-receipt-version.json
+
+20/21 conform · 1 divergence(s)
+RED baseline — divergences are expected pre-SDK-plan (JCS canonicalization, missing envelope primitive, receipt projection). See recovery/CONFORMANCE_PLAN.md.
+
+================================================================
+# EXTERNAL CROSS-CHECK — foundation reference verifier (Node, zero-dep)
+# node v20.20.2 · verify-receipt.mjs --suite over the same vendored vectors
+================================================================
+✓ INVALID foundation/conformance/canon/vectors/receipt/invalid/wrong-receipt-version.json — rejected (1 error)
+
+21 passed, 0 failed
+
+# INTERPRETATION
+# - labd 20/21 vs reference 21/21. Sole difference: envelope.json.
+#   labd fails it ONLY because logline-act has no envelope primitive
+#   (compute_envelope_hash) — divergence #2. The reference can verify it.
+# - labd reproduces the canon byte-for-byte on ALL 20 receipt-layer vectors,
+#   INCLUDING aux-unicode / aux-number-decimal / aux-key-order.
+# - CAVEAT (not a clean bill): the current vectors do NOT exercise the JCS
+#   edge cases where labd's hand-rolled canonicalizer provably diverges:
+#     * object KEYS containing astral (>U+FFFF) code points — labd sorts by
+#       Unicode scalar (UTF-8 byte order); JCS sorts by UTF-16 code units.
+#     * numbers needing ES6 exponential form. serde vs ES6 Number.toString.
+#   So 20/20 receipts pass by happening to match, not by spec guarantee.
+#   The canon forbids relying on a 'close' hand-roll → P1 (real JCS via
+#   serde_jcs) remains REQUIRED, plus the envelope primitive.

@@ -197,10 +197,12 @@ mod tests {
 
     // === 20.3 Protocol ==================================================
 
-    /// A13 — Conformance vectors run.
+    /// A13 — Conformance vectors run. (Kit tier: 4 lab-formation examples after the
+    /// non-conforming `i02_tenth_slot` vector was quarantined; the authoritative canon
+    /// hash-conformance tier lives in `logline-lab-conformance::canon`.)
     #[test]
     fn a13_conformance_vectors_run() {
-        assert!(run_conformance(&builtin_vectors()).total >= 5);
+        assert!(run_conformance(&builtin_vectors()).total >= 4);
     }
 
     /// A14 — Conformance report is generated.
