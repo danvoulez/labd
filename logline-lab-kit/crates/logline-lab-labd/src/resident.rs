@@ -146,6 +146,7 @@ impl ResidentSession {
                 provenance: Provenance {
                     drafted_by: Drafter::Human { id: self.human.clone() },
                     provider: None,
+                    model: None,
                     note: None,
                 },
             });

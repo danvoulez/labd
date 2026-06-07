@@ -1,0 +1,23 @@
+[package]
+name = "logline-lab-providers"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+# Provider PLUMBING, contained here and hidden behind logline_lab_session::ProviderAdapter.
+# genai is a multi-provider CLIENT (not an agent framework / memory / planner). The Lab
+# exposes ProviderAdapter; genai is an implementation detail. Large transitive footprint
+# (see recovery/PROVIDER_CLIENT_SPIKE.md + the P4 supply-chain TODO).
+[dependencies]
+logline-act.workspace = true
+logline-lab-session.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+genai.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

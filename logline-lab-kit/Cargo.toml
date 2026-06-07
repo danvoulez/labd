@@ -14,6 +14,7 @@ members = [
   "crates/logline-lab-reports",
   "crates/logline-lab-conformance",
   "crates/logline-lab-session",
+  "crates/logline-lab-providers",
   "crates/logline-lab-cli",
   "crates/logline-lab-labd",
   "crates/logline-lab-acceptance",
@@ -38,6 +39,7 @@ default-members = [
   "crates/logline-lab-reports",
   "crates/logline-lab-conformance",
   "crates/logline-lab-session",
+  "crates/logline-lab-providers",
   "crates/logline-lab-cli",
   "crates/logline-lab-labd",
   "crates/logline-lab-acceptance",
@@ -63,6 +65,12 @@ sha2 = "0.10"
 clap = { version = "4.5", features = ["derive"] }
 thiserror = "2.0"
 anyhow = "1.0"
+# Provider PLUMBING (buy, don't hand-roll), contained to logline-lab-providers and hidden
+# behind the ProviderAdapter seam. genai is a multi-provider client, NOT an agent
+# framework. Large transitive footprint — see recovery/PROVIDER_CLIENT_SPIKE.md + the P4
+# TODO (cargo-deny/audit/SBOM).
+genai = "0.6"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 
 # internal
 logline-act = { path = "crates/logline-act" }
@@ -78,6 +86,7 @@ logline-lab-dispatch = { path = "crates/logline-lab-dispatch" }
 logline-lab-reports = { path = "crates/logline-lab-reports" }
 logline-lab-conformance = { path = "crates/logline-lab-conformance" }
 logline-lab-session = { path = "crates/logline-lab-session" }
+logline-lab-providers = { path = "crates/logline-lab-providers" }
 logline-lab-labd = { path = "crates/logline-lab-labd" }
 
 [workspace.lints.rust]

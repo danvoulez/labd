@@ -1,0 +1,11 @@
+{
+  "who": "operator",
+  "did": "register_provider",
+  "this": "provider_id=ollama; kind=openai-compatible; base_url=http://localhost:11434/v1; model=llama3.2; auth_env=; dev_only=true",
+  "when": "2026-06-07T00:00:01Z",
+  "confirmed_by": "operator",
+  "if_ok": "provider_available_for_session_candidates",
+  "if_doubt": "keep_provider_disabled",
+  "if_not": "do_not_use_provider",
+  "status": "admitted"
+}

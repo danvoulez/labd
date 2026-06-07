@@ -83,6 +83,24 @@ pub enum Drafter {
     Worker { id: String },
 }
 
+/// Detailed provenance of a model-produced candidate. Authorship metadata only — it
+/// records *what produced the draft*, never that the draft is confirmed.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModelProvenance {
+    pub provider_id: String,
+    pub provider_kind: String,
+    pub model: String,
+    /// A label for the endpoint (e.g. base URL or a name) — for provenance, not secrets.
+    pub endpoint_label: String,
+    pub request_time: String,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub source: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub response_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub response_hash: Option<String>,
+}
+
 /// Provenance of a candidate: who drafted it and (if a model assisted) which provider.
 /// Kept separate from the Act's `confirmed_by` slot on purpose — provenance is authorship,
 /// `confirmed_by` is confirmation/witness/proof/validator/signature/acknowledged-absence.
@@ -92,6 +110,9 @@ pub struct Provenance {
     /// Set iff a model produced or assisted this candidate.
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub provider: Option<ProviderId>,
+    /// Detailed model provenance, when a model produced the candidate.
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub model: Option<ModelProvenance>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub note: Option<String>,
 }
@@ -113,6 +134,7 @@ impl SessionActCandidate {
             provenance: Provenance {
                 drafted_by: Drafter::Human { id: human_id.into() },
                 provider: None,
+                model: None,
                 note: None,
             },
         }
@@ -126,6 +148,22 @@ impl SessionActCandidate {
             provenance: Provenance {
                 drafted_by: Drafter::Model { provider: provider.clone() },
                 provider: Some(provider),
+                model: None,
+                note: None,
+            },
+        }
+    }
+
+    /// A model-drafted candidate with full model provenance (provider/model/endpoint/
+    /// request-time/response). Provenance is authorship; it never satisfies `confirmed_by`.
+    pub fn from_model_with_provenance(prov: ModelProvenance, raw: Value) -> Self {
+        let provider = ProviderId(prov.provider_id.clone());
+        Self {
+            candidate: raw,
+            provenance: Provenance {
+                drafted_by: Drafter::Model { provider: provider.clone() },
+                provider: Some(provider),
+                model: Some(prov),
                 note: None,
             },
         }
@@ -362,6 +400,31 @@ mod tests {
         assert!(c.is_model_drafted());
         assert_eq!(c.provenance.provider, Some(ProviderId("ollama".into())));
         // The substrate carried the model's draft verbatim and did NOT fill confirmed_by.
+        assert_eq!(c.candidate.get("confirmed_by").and_then(Value::as_str), Some(""));
+    }
+
+    /// Full model provenance is recorded as authorship; it still does not satisfy
+    /// confirmation (`confirmed_by` is left to the human/witness path).
+    #[test]
+    fn model_provenance_is_authorship_not_confirmation() {
+        let raw = json!({
+            "who": "model", "did": "propose", "this": "x", "when": "",
+            "confirmed_by": "", "if_ok": "", "if_doubt": "", "if_not": "", "status": "candidate"
+        });
+        let mp = ModelProvenance {
+            provider_id: "minilab".into(),
+            provider_kind: "openai-compatible".into(),
+            model: "default".into(),
+            endpoint_label: "https://example.com/v1".into(),
+            request_time: "2026-06-07T00:00:00Z".into(),
+            source: Some("today".into()),
+            response_id: None,
+            response_hash: None,
+        };
+        let c = SessionActCandidate::from_model_with_provenance(mp, raw);
+        assert!(c.is_model_drafted());
+        assert_eq!(c.provenance.model.as_ref().unwrap().model, "default");
+        // Authorship recorded; confirmation NOT granted by the model.
         assert_eq!(c.candidate.get("confirmed_by").and_then(Value::as_str), Some(""));
     }
 

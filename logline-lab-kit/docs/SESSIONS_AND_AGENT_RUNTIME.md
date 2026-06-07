@@ -197,23 +197,36 @@ No provider becomes core meaning. OpenAI-compatible chat-completion APIs are one
 
 ---
 
-## 8. Settings — provider registry & secrets
+## 8. Settings — provider registry (Acts) & secrets
 
-The current Settings surface is **read-only** (`logline.view.settings.v0`; "authority is
-always locked"). The provider registry is **runtime config, not core semantics** — adding
-a provider must never mutate LogLine core. New commands:
+**Provider truth is the Act graph, not a config file.** A Lab's decision to register /
+disable / set-default / call / test a provider is accountable history, emitted as a
+LogLine Act: `register_provider`, `disable_provider`, `set_default_provider`,
+`provider_call`, `test_provider`. The live registry is a **projection folded from those
+Acts** — disposable and rebuildable; there is **no `providers.json` source of truth**.
+(A cache file is permissible later *only* if explicitly rebuildable from Acts; this pass
+ships projection-from-Acts with no cache file.)
+
+These Acts use **string slots** (the canon mold's nature). `this` is a
+`key=value; key=value` descriptor — e.g.
+`provider_id=openai; kind=openai-compatible; base_url=…; model=…; auth_env=OPENAI_API_KEY; dev_only=false`.
+See `examples/providers/*.json` (real nine-slot Acts; **no YAML, no JSON-Schema, no
+`.logline`**). labd may use a richer structured-slot candidate internally for ergonomics,
+but that must project to this string-slot shape before any canon claim (open divergence #3).
+
+Commands (each operates on a `--lab/--profile/--store` Lab and emits/projects Acts):
 
 ```
-labkit settings providers list
-labkit settings providers add ollama    --url ...
-labkit settings providers add anthropic --api-key-env ANTHROPIC_API_KEY
-labkit settings providers add openai     --api-key-env OPENAI_API_KEY
-labkit settings providers set-default ...
-labkit settings providers test ...
+labkit settings providers list                       # projected from the Lab's Acts
+labkit settings providers add <id> --kind openai-compatible --base-url … --model … --api-key-env <ENV> [--dev-only]
+labkit settings providers set-default <id>
+labkit settings providers disable <id>
+labkit settings providers test <id>
 ```
 
-Secrets must not be stored casually in plain config. Prefer env vars; OS keychain later;
-explicit local-dev mode otherwise.
+**Secrets never enter Acts** — only the env-var **name** (`auth_env`/`--api-key-env`) and
+the non-secret endpoint. The key value is read from the env at use time. Prefer env vars;
+OS keychain later.
 
 ---
 
@@ -344,7 +357,8 @@ participation; worker evidence; resumability from Acts; shared surfaces.
 - ✅ **B** — `logline-lab-session` crate (provider-neutral types + `ProviderAdapter` trait).
 - ✅ **Provider spike** — genai 0.6.5 accepted by behavior (live round-trip pending; `recovery/PROVIDER_CLIENT_SPIKE.md`).
 - ✅ **C** — provider-free resident session: `ResidentSession` in `logline-lab-labd`, `labkit session start|view|write|approve|tick|transcript|close`, no-provider fixture (`release/examples/no-provider-session.sh`) proving capture/approve/admit/tick/transcript + **resume-after-restart from Acts** (no session-truth store). Wired into the gate.
-- ⏳ **D** — attach genai behind the trait (gate on a live Ollama round-trip).
+- ✅ **D** — provider-ready (not provider-complete). New crate `logline-lab-providers` contains the genai plumbing behind `ProviderAdapter` (no agent framework). **Provider truth is Acts** (`register_provider`/`disable_provider`/`set_default_provider`/`provider_call`/`test_provider`, string slots); the registry is a projection (no `providers.json` authority). `labkit settings providers add|list|set-default|disable|test` + `labkit session suggest`. Provenance on every model candidate; **model output never satisfies `confirmed_by`**. Secrets stay out of Acts (env-var name only). Optional `release/checks/provider-live.sh` (skips honestly without env; verified live against an OpenAI-compatible endpoint). Footprint contained + flagged for P4. Examples are nine-slot Act JSON.
+  - **Note on tooling vs canon:** the vendored `foundation/conformance/` (schemas, vectors, verifier, drift) is **external conformance tooling / reference witness**, NOT canon. The canon is the mold `logline.receipt.v0` + the JCS/hash/envelope discipline it proves. A same-nature cleanup pass is queued (`recovery/SAME_NATURE_CLEANUP.md`).
 
 ### In scope (remaining)
 Settings provider registry (E) · resident provider MVP (F) · event stream contract (G) ·
